@@ -3,6 +3,6 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "env": {
-    "VITE_APP_NAME": "@InMobiSuite"
+    "VITE_APP_NAME": "InMobi Suite"
   }
 }
