@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, AlertCircle } from 'lucide-react';
+import { AlertCircle, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import LogoBrand from '../components/LogoBrand';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { isDarkMode, toggleDarkMode, branding, colors } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -17,7 +20,6 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    // Validación simple
     if (!email || !password) {
       setError('Por favor completa todos los campos');
       setLoading(false);
@@ -30,7 +32,6 @@ export default function Login() {
       return;
     }
 
-    // Simular llamada al servidor
     setTimeout(() => {
       if (login(email, password, role)) {
         navigate('/');
@@ -48,30 +49,62 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+      isDarkMode
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900'
+        : 'bg-gradient-to-br from-pink-600 via-pink-500 to-rose-500'
+    }`}>
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className={`rounded-lg shadow-2xl p-8 transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-slate-800'
+            : 'bg-white'
+        }`}>
+          {/* Dark mode toggle - esquina superior derecha */}
+          <div className="flex justify-between items-start mb-8">
+            <div></div>
+            <button
+              onClick={toggleDarkMode}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode
+                  ? 'bg-slate-700 text-yellow-400 hover:bg-slate-600'
+                  : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+              }`}
+              title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
+
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-              <Building2 size={32} className="text-white" />
-            </div>
+            <LogoBrand size="xl" showText={false} />
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
-            InMobi Suite
+          <h1 className={`text-3xl font-bold text-center mb-2 ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
+            {branding.appName}
           </h1>
-          <p className="text-gray-600 text-center mb-8">
-            CRM Inmobiliario Profesional
+          <p className={`text-center mb-8 text-sm ${
+            isDarkMode ? 'text-slate-400' : 'text-gray-600'
+          }`}>
+            {branding.tagline}
           </p>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-              <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
-              <p className="text-sm text-red-600">{error}</p>
+            <div className={`mb-6 p-4 rounded-lg flex gap-3 ${
+              isDarkMode
+                ? 'bg-red-900 bg-opacity-30 border border-red-700'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <AlertCircle className={isDarkMode ? 'text-red-400' : 'text-red-600'} size={20} />
+              <p className={`text-sm ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
+                {error}
+              </p>
             </div>
           )}
 
@@ -79,7 +112,9 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4 mb-6">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-slate-300' : 'text-gray-700'
+              }`}>
                 Email
               </label>
               <input
@@ -87,13 +122,19 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                  isDarkMode
+                    ? 'bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-pink-500'
+                    : 'border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-pink-500'
+                }`}
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-slate-300' : 'text-gray-700'
+              }`}>
                 Contraseña
               </label>
               <input
@@ -101,19 +142,29 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                  isDarkMode
+                    ? 'bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-pink-500'
+                    : 'border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-pink-500'
+                }`}
               />
             </div>
 
             {/* Role Selector */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-slate-300' : 'text-gray-700'
+              }`}>
                 Rol
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                  isDarkMode
+                    ? 'bg-slate-700 border border-slate-600 text-white focus:ring-pink-500'
+                    : 'border border-gray-300 bg-white text-gray-900 focus:ring-pink-500'
+                }`}
               >
                 <option value="admin">Administrador</option>
                 <option value="agente">Agente Inmobiliario</option>
@@ -125,46 +176,79 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className={`w-full font-semibold py-2 px-4 rounded-lg transition-colors mt-6 text-white disabled:opacity-50 ${
+                isDarkMode
+                  ? 'bg-pink-600 hover:bg-pink-500'
+                  : 'bg-pink-600 hover:bg-pink-700'
+              }`}
+              style={{
+                background: isDarkMode 
+                  ? `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`
+                  : `linear-gradient(135deg, ${colors.primary}, #FF1493)`
+              }}
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
           </form>
 
           {/* Demo Accounts */}
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-xs text-gray-600 text-center mb-4">
+          <div className={`border-t pt-6 ${
+            isDarkMode ? 'border-slate-700' : 'border-gray-200'
+          }`}>
+            <p className={`text-xs text-center mb-4 ${
+              isDarkMode ? 'text-slate-400' : 'text-gray-600'
+            }`}>
               Cuentas de demostración:
             </p>
             <div className="space-y-2">
               <button
                 onClick={() => handleQuickLogin('admin@inmobiliaria.com', 'admin')}
-                className="w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition-colors border border-gray-200"
+                className={`w-full text-left px-4 py-2 rounded-lg transition-colors border ${
+                  isDarkMode
+                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-100 border-slate-600'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+                }`}
               >
                 <div className="font-medium">Admin</div>
-                <div className="text-xs text-gray-500">admin@inmobiliaria.com</div>
+                <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                  admin@inmobiliaria.com
+                </div>
               </button>
               <button
                 onClick={() => handleQuickLogin('agente@inmobiliaria.com', 'agente')}
-                className="w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition-colors border border-gray-200"
+                className={`w-full text-left px-4 py-2 rounded-lg transition-colors border ${
+                  isDarkMode
+                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-100 border-slate-600'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+                }`}
               >
                 <div className="font-medium">Agente</div>
-                <div className="text-xs text-gray-500">agente@inmobiliaria.com</div>
+                <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                  agente@inmobiliaria.com
+                </div>
               </button>
               <button
                 onClick={() => handleQuickLogin('usuario@inmobiliaria.com', 'usuario')}
-                className="w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition-colors border border-gray-200"
+                className={`w-full text-left px-4 py-2 rounded-lg transition-colors border ${
+                  isDarkMode
+                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-100 border-slate-600'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+                }`}
               >
                 <div className="font-medium">Usuario</div>
-                <div className="text-xs text-gray-500">usuario@inmobiliaria.com</div>
+                <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                  usuario@inmobiliaria.com
+                </div>
               </button>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-white text-center text-sm mt-8">
-          © 2024 InMobi Suite. Todos los derechos reservados.
+        <p className={`text-center text-sm mt-8 ${
+          isDarkMode ? 'text-slate-400' : 'text-white'
+        }`}>
+          © 2024 {branding.appName}. Todos los derechos reservados.
         </p>
       </div>
     </div>

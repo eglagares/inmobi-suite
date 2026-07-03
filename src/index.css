@@ -14,6 +14,34 @@
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Colores claros */
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-text-tertiary: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+}
+
+html.dark {
+  /* Colores oscuros */
+  --color-primary: #3b82f6;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #1e40af;
+  --color-bg: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-border: #334155;
+  --color-border-light: #475569;
 }
 
 html,
@@ -26,6 +54,12 @@ body,
   overflow: hidden;
 }
 
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -34,14 +68,186 @@ button {
 }
 
 input,
-textarea {
+textarea,
+select {
   font-family: inherit;
 }
 
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* Transiciones suaves */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Utilidades personalizadas */
+@layer components {
+  .card-light {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  }
+
+  .card-dark {
+    @apply bg-slate-800 rounded-lg border border-slate-700 shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-primary-dark {
+    @apply bg-blue-700 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .input-light {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  .input-dark {
+    @apply w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-400;
+  }
+
+  .table-light {
+    @apply w-full;
+  }
+
+  .table-light thead {
+    @apply bg-gray-50 border-b border-gray-200;
+  }
+
+  .table-light tbody tr {
+    @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+  }
+
+  .table-dark {
+    @apply w-full;
+  }
+
+  .table-dark thead {
+    @apply bg-slate-700 border-b border-slate-600;
+  }
+
+  .table-dark tbody tr {
+    @apply border-b border-slate-600 hover:bg-slate-700 transition-colors;
+  }
+}
+
+/* Gradiente responsivo */
+@responsive {
+  .gradient-light {
+    @apply from-blue-600 to-blue-500;
+  }
+
+  .gradient-dark {
+    @apply from-blue-900 to-blue-700;
+  }
+}
+
+/* Animaciones */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Responsive - Mobile first */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  main {
+    padding: 1rem !important;
+  }
+}
+
+/* Responsive - Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+  body {
+    font-size: 15px;
+  }
+
+  main {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Responsive - Desktop */
+@media (min-width: 1025px) {
+  main {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Modo oscuro forzado para ciertos elementos */
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-contrast: more) {
+  :root {
+    --color-primary: #0a3a8d;
+    --color-text: #000000;
+  }
+
+  html.dark {
+    --color-primary: #90caf9;
+    --color-text: #ffffff;
+  }
+}
+
+/* Focus visible para accesibilidad */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
