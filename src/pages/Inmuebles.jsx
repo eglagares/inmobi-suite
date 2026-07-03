@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Building2, Plus, Search, Filter, MapPin, Bed, Bath, Ruler } from 'lucide-react';
 
+import apartamentoCentro from '../assets/inmuebles/piso.jpg';
+import chaletLujo from '../assets/inmuebles/chalet.jpg';
+import chaletPiscina from '../assets/inmuebles/chaletPiscina.jpg';
+
 export default function Inmuebles() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +20,7 @@ export default function Inmuebles() {
       baños: 2,
       area: '120m²',
       estado: 'Activo',
-      imagen: 'https://via.placeholder.com/300x200?text=Apartamento'
+      imagen: apartamentoCentro
     },
     {
       id: 2,
@@ -28,19 +32,19 @@ export default function Inmuebles() {
       baños: 3,
       area: '250m²',
       estado: 'Vendido',
-      imagen: 'https://via.placeholder.com/300x200?text=Casa'
+      imagen: chaletLujo
     },
     {
       id: 3,
-      nombre: 'Oficina Comercial Piso 5',
-      precio: '$150,000',
-      tipo: 'Oficina',
-      ubicacion: 'Centro Comercial',
-      dormitorios: 0,
-      baños: 1,
-      area: '85m²',
+      nombre: 'Casa con piscina y jardín',
+      precio: '$350,000',
+      tipo: 'Casa',
+      ubicacion: 'Zona Oeste',
+      dormitorios: 3,
+      baños: 2,
+      area: '200m²',
       estado: 'Activo',
-      imagen: 'https://via.placeholder.com/300x200?text=Oficina'
+      imagen: chaletPiscina
     },
   ];
 
