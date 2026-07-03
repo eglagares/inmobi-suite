@@ -12,6 +12,9 @@ export default function LogoBrand({ size = 'md', showText = true }) {
     lg: 'w-16 h-16',
     xl: 'w-20 h-20',
     '2xl': 'w-24 h-24',
+     '3xl': 'w-28 h-28',
+      '4xl': 'w-32 h-32',
+      '5xl': 'w-36 h-36',
   };
 
   const textSizes = {
@@ -21,18 +24,19 @@ export default function LogoBrand({ size = 'md', showText = true }) {
     lg: 'text-lg',
     xl: 'text-xl',
     '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+    '4xl': 'text-4xl',
+    '5xl': 'text-5xl',
   };
 
   return (
     <div className="flex items-center gap-3">
       {/* Logo */}
-      <div className={`${sizeClasses[size]} rounded-lg overflow-hidden flex-shrink-0 ${
-        isDarkMode ? 'bg-slate-700' : 'bg-white'
-      } flex items-center justify-center border-2 border-pink-500 shadow-sm`}>
+      <div className={`${sizeClasses[size]} rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center`}>
         <img
           src={branding.logoUrl}
           alt={branding.logoAlt}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           onError={(e) => {
             // Fallback si la imagen no carga
             e.target.style.display = 'none';

@@ -78,12 +78,12 @@ export default function Login() {
           </div>
 
           {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <LogoBrand size="xl" showText={false} />
+          <div className="flex justify-center mb-10">
+            <LogoBrand size="5xl" showText={false} />
           </div>
 
           {/* Title */}
-          <h1 className={`text-3xl font-bold text-center mb-2 ${
+          <h1 className={`text-4xl font-bold text-center mb-2 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
             {branding.appName}
@@ -248,7 +248,7 @@ export default function Login() {
         <p className={`text-center text-sm mt-8 ${
           isDarkMode ? 'text-slate-400' : 'text-white'
         }`}>
-          © 2024 {branding.appName}. Todos los derechos reservados.
+          © 2026 {branding.appName}. Todos los derechos reservados.
         </p>
       </div>
     </div>
