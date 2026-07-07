@@ -2,6 +2,12 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AIProvider }  from './context/AIContext';  
+
+// Páginas de IA
+import AIHub from './pages/AIHub';
+import AISettings from './pages/AISettings';
+
 
 // Páginas
 import Login from './pages/Login';
@@ -12,6 +18,8 @@ import Visitas from './pages/Visitas';
 import Contratos from './pages/Contratos';
 import Ventas from './pages/Ventas';
 import Estadisticas from './pages/Estadisticas';
+
+
 
 // Layout
 import MainLayout from './components/MainLayout';
@@ -45,6 +53,10 @@ function AppContent() {
         <Route path="contratos" element={<Contratos />} />
         <Route path="ventas" element={<Ventas />} />
         <Route path="estadisticas" element={<Estadisticas />} />
+        
+        {/* Rutas de IA */}
+        <Route path="ia" element={<AIHub />} />
+        <Route path="ia-settings" element={<AISettings />} />
       </Route>
 
       {/* Redireccionar rutas desconocidas */}
@@ -58,7 +70,9 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AppContent />
+          <AIProvider>
+            <AppContent />
+          </AIProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
