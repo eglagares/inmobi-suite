@@ -12,7 +12,7 @@ import AISettings from './pages/AISettings';
 // Páginas
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Inmuebles from './pages/Inmuebles';
+import Inmuebles from './pages/Inmuebles_CRUD_COMPLETO';
 import Clientes from './pages/Clientes';
 import Visitas from './pages/Visitas';
 import Contratos from './pages/Contratos';
@@ -71,8 +71,9 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
-           <SupabaseProvider/>
-            <AppContent />
+            <SupabaseProvider>
+              <AppContent />
+            </SupabaseProvider>
           </AIProvider>
         </AuthProvider>
       </ThemeProvider>

@@ -15,32 +15,36 @@ export default function Login() {
   const { isDarkMode, toggleDarkMode, branding, colors } = useTheme();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    if (!email || !password) {
-      setError('Por favor completa todos los campos');
-      setLoading(false);
-      return;
-    }
+  if (!email || !password) {
+    setError('Por favor completa todos los campos');
+    setLoading(false);
+    return;
+  }
 
-    if (!email.includes('@')) {
-      setError('Por favor ingresa un email válido');
-      setLoading(false);
-      return;
-    }
+  if (!email.includes('@')) {
+    setError('Por favor ingresa un email válido');
+    setLoading(false);
+    return;
+  }
 
-    setTimeout(() => {
-      if (login(email, password, role)) {
-        navigate('/');
-      } else {
-        setError('Error al iniciar sesión');
-      }
-      setLoading(false);
-    }, 500);
-  };
+  // Simula la espera si quieres mantenerla
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const success = await login(email, password, role);
+
+  if (success) {
+    navigate('/');
+  } else {
+    setError('Error al iniciar sesión');
+  }
+
+  setLoading(false);
+};
 
   const handleQuickLogin = (testEmail, testRole) => {
     setEmail(testEmail);
