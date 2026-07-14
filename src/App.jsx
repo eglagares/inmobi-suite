@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AIProvider }  from './context/AIContext';  
-
+import { SupabaseProvider } from './context/SupabaseContext';
 // Páginas de IA
 import AIHub from './pages/AIHub';
 import AISettings from './pages/AISettings';
@@ -71,6 +71,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
+           <SupabaseProvider/>
             <AppContent />
           </AIProvider>
         </AuthProvider>
