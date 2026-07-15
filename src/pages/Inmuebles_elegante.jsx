@@ -408,7 +408,7 @@ export default function Inmuebles() {
                 {/* Detalles */}
                 <div className="grid grid-cols-3 gap-2 py-3 border-y" 
                   style={{ borderColor: isDarkMode ? '#475569' : '#e5e7eb' }}>
-                  {inmueble.area && (
+                  {(inmueble.area != null || inmueble.area >= 0) && (
                     <div className="text-center">
                       <Maximize2 size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
                       <p className={`text-xs font-semibold ${
@@ -430,7 +430,7 @@ export default function Inmuebles() {
                     </div>
                   )}
 
-                  {inmueble.banos && (
+                  {(inmueble.banos != null || inmueble.banos >= 0) && (
                     <div className="text-center">
                       <Bath size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
                       <p className={`text-xs font-semibold ${
