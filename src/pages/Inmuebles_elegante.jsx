@@ -1,20 +1,13 @@
 import { useEffect, useState } from 'react';
 import { inmuebleService } from '../services/supabaseServices';
 import { useTheme } from '../context/ThemeContext';
-
-//import { useSupabase } from '../context/SupabaseContext';
-import { useAuth } from '../context/AuthContext';
-
+import { useSupabase } from '../context/SupabaseContext';
 import FormularioInmueble from '../components/FormularioInmueble';
 import ModalConfirmacion from '../components/ModalConfirmacion';
-import { Search, MapPin, Home, DollarSign, Maximize2, Bed, Bath, Plus, Edit, Trash2 } from 'lucide-react';
+import { Search, MapPin, Home, DollarSign, Maximize2, Bed, Bath, Plus, Edit3, Trash2 } from 'lucide-react';
 
 export default function Inmuebles() {
-//const { user } = useSupabase();
-const { user } = useAuth();
-
-
-
+  const { user } = useSupabase();
   const [inmuebles, setInmuebles] = useState([]);
   const [filtrados, setFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,9 +31,6 @@ const { user } = useAuth();
     aplicarFiltros();
   }, [inmuebles, busqueda, filtroTipo, filtroEstado]);
 
-
-console.log("Usuario Auth:", user);
-
   const cargarInmuebles = async () => {
     setLoading(true);
     try {
@@ -63,7 +53,6 @@ console.log("Usuario Auth:", user);
   const aplicarFiltros = () => {
     let resultado = inmuebles;
 
-    // Filtro de búsqueda
     if (busqueda.trim()) {
       resultado = resultado.filter(
         inmueble =>
@@ -73,12 +62,10 @@ console.log("Usuario Auth:", user);
       );
     }
 
-    // Filtro de tipo
     if (filtroTipo !== 'todos') {
       resultado = resultado.filter(inmueble => inmueble.tipo === filtroTipo);
     }
 
-    // Filtro de estado
     if (filtroEstado !== 'todos') {
       resultado = resultado.filter(inmueble => inmueble.estado === filtroEstado);
     }
@@ -89,13 +76,13 @@ console.log("Usuario Auth:", user);
   const obtenerColorEstado = (estado) => {
     switch (estado) {
       case 'disponible':
-        return 'bg-green-500';
+        return 'bg-emerald-500';
       case 'vendido':
-        return 'bg-red-500';
+        return 'bg-rose-500';
       case 'alquilado':
-        return 'bg-blue-500';
+        return 'bg-sky-500';
       default:
-        return 'bg-gray-500';
+        return 'bg-slate-500';
     }
   };
 
@@ -112,7 +99,6 @@ console.log("Usuario Auth:", user);
     }
   };
 
-  // Funciones de CRUD
   const abrirFormularioNuevo = () => {
     setInmuebleEditar(null);
     setMostrarFormulario(true);
@@ -188,10 +174,9 @@ console.log("Usuario Auth:", user);
           </p>
         </div>
 
-        {/* Botón Crear */}
         <button
           onClick={abrirFormularioNuevo}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold transition-all hover:shadow-lg"
+          className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold transition-all hover:shadow-lg active:scale-95"
           style={{ backgroundColor: colors.primary }}
         >
           <Plus size={20} />
@@ -275,17 +260,17 @@ console.log("Usuario Auth:", user);
           {filtrados.map(inmueble => (
             <div
               key={inmueble.id}
-              className={`rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col ${
+              className={`rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group ${
                 isDarkMode ? 'bg-slate-800' : 'bg-white'
               }`}
             >
-              {/* Imagen desde Supabase Storage */}
-              <div className="relative h-48 bg-gray-200 overflow-hidden group">
+              {/* Imagen */}
+              <div className="relative h-48 bg-gray-200 overflow-hidden">
                 {inmueble.imagenes_urls?.[0] ? (
                   <img
                     src={inmueble.imagenes_urls[0]}
                     alt={inmueble.titulo}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
                 ) : (
@@ -294,11 +279,11 @@ console.log("Usuario Auth:", user);
                   </div>
                 )}
 
-                {/* Overlay con estado */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                {/* Overlay oscuro sutil */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
 
-                {/* Badge de estado */}
-                <div className="absolute top-3 right-3">
+                {/* Badges */}
+                <div className="absolute top-3 right-3 flex gap-2">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
                     obtenerColorEstado(inmueble.estado)
                   }`}>
@@ -306,7 +291,6 @@ console.log("Usuario Auth:", user);
                   </span>
                 </div>
 
-                {/* Badge de tipo */}
                 <div className="absolute top-3 left-3">
                   <span className="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     style={{ backgroundColor: colors.primary }}>
@@ -318,7 +302,7 @@ console.log("Usuario Auth:", user);
               {/* Contenido */}
               <div className="p-4 space-y-3 flex-1 flex flex-col">
                 {/* Título */}
-                <h3 className={`font-bold text-lg line-clamp-2 ${
+                <h3 className={`font-bold text-base line-clamp-2 ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
                   {inmueble.titulo}
@@ -326,7 +310,7 @@ console.log("Usuario Auth:", user);
 
                 {/* Precio */}
                 <div className="flex items-center gap-2">
-                  <DollarSign size={20} style={{ color: colors.primary }} />
+                  <DollarSign size={18} style={{ color: colors.primary }} />
                   <p className="text-lg font-bold" style={{ color: colors.primary }}>
                     ${inmueble.precio?.toLocaleString('es-ES') || '0'}
                   </p>
@@ -334,7 +318,7 @@ console.log("Usuario Auth:", user);
 
                 {/* Ubicación */}
                 <div className="flex items-start gap-2">
-                  <MapPin size={16} className={isDarkMode ? 'text-slate-400 mt-1' : 'text-gray-600 mt-1'} />
+                  <MapPin size={16} className={`${isDarkMode ? 'text-slate-400' : 'text-gray-600'} flex-shrink-0 mt-0.5`} />
                   <p className={`text-sm ${
                     isDarkMode ? 'text-slate-400' : 'text-gray-600'
                   }`}>
@@ -343,9 +327,8 @@ console.log("Usuario Auth:", user);
                 </div>
 
                 {/* Detalles */}
-                <div className="grid grid-cols-3 gap-2 py-2 border-y" 
+                <div className="grid grid-cols-3 gap-2 py-3 border-y" 
                   style={{ borderColor: isDarkMode ? '#475569' : '#e5e7eb' }}>
-                  {/* Área */}
                   {inmueble.area && (
                     <div className="text-center">
                       <Maximize2 size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
@@ -357,7 +340,6 @@ console.log("Usuario Auth:", user);
                     </div>
                   )}
 
-                  {/* Dormitorios */}
                   {inmueble.dormitorios && (
                     <div className="text-center">
                       <Bed size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
@@ -369,7 +351,6 @@ console.log("Usuario Auth:", user);
                     </div>
                   )}
 
-                  {/* Baños */}
                   {inmueble.banos && (
                     <div className="text-center">
                       <Bath size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
@@ -382,22 +363,31 @@ console.log("Usuario Auth:", user);
                   )}
                 </div>
 
-                {/* Botones de acción */}
-                <div className="grid grid-cols-2 gap-2 mt-auto">
+                {/* Botones de acción elegantes */}
+                <div className="flex gap-2 mt-auto pt-2">
+                  {/* Botón Editar */}
                   <button
                     onClick={() => abrirFormularioEditar(inmueble)}
-                    className="flex items-center justify-center gap-1 py-2 rounded-lg font-semibold text-white transition-all hover:opacity-90"
-                    style={{ backgroundColor: colors.primary }}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium transition-all duration-200 group/edit ${
+                      isDarkMode
+                        ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
+                    }`}
                   >
-                    <Edit size={16} />
-                    Editar
+                    <Edit3 size={16} className="group-hover/edit:scale-110 transition-transform" />
+                    <span className="text-sm">Editar</span>
                   </button>
+
+                  {/* Botón Eliminar */}
                   <button
                     onClick={() => abrirConfirmacionEliminar(inmueble)}
-                    className="flex items-center justify-center gap-1 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-all"
+                    className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium transition-all duration-200 group/delete border ${
+                      isDarkMode
+                        ? 'bg-red-950 hover:bg-red-900 border-red-800 text-red-300 hover:text-red-100'
+                        : 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700'
+                    }`}
                   >
-                    <Trash2 size={16} />
-                    Eliminar
+                    <Trash2 size={16} className="group-hover/delete:scale-110 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -453,7 +443,6 @@ console.log("Usuario Auth:", user);
           inmuebleId={inmuebleEditar?.id}
           onClose={cerrarFormulario}
           onGuardado={handleInmuebleGuardado}
-          agenteId={user?.id}
         />
       )}
 

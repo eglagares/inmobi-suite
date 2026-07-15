@@ -12,7 +12,7 @@ import AISettings from './pages/AISettings';
 // Páginas
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Inmuebles from './pages/Inmuebles_CRUD_COMPLETO';
+import Inmuebles from './pages/Inmuebles_elegante';
 import Clientes from './pages/Clientes';
 import Visitas from './pages/Visitas';
 import Contratos from './pages/Contratos';
