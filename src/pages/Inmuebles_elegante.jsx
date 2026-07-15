@@ -358,8 +358,8 @@ export default function Inmuebles() {
 </div>
 
 {/* Indicadores */}
-{inmueble.imagenes_urls?.length > 1 && (
-  <div className="flex justify-center gap-2 py-3">
+{inmueble.imagenes_urls?.length >= 1 && (
+  <div className="h-10 flex items-center justify-center">
     {inmueble.imagenes_urls.map((_, i) => (
       <button
         key={i}
@@ -419,7 +419,7 @@ export default function Inmuebles() {
                     </div>
                   )}
 
-                  {inmueble.dormitorios && (
+                  {inmueble.dormitorios != null && (
                     <div className="text-center">
                       <Bed size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
                       <p className={`text-xs font-semibold ${
