@@ -6,6 +6,11 @@ import FormularioInmueble from '../components/FormularioInmueble';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 import { Search, MapPin, Home, DollarSign, Maximize2, Bed, Bath, Plus, Edit3, Trash2 } from 'lucide-react';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+
+
+
 export default function Inmuebles() {
   const { user } = useSupabase();
   const [inmuebles, setInmuebles] = useState([]);
@@ -22,6 +27,21 @@ export default function Inmuebles() {
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [inmuebleEliminar, setInmuebleEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
+
+  //carrusel de imágenes de inmueble
+  const [imagenActual, setImagenActual] = useState({});
+  const siguienteImagen = (id, total) => {
+    setImagenActual(prev => ({
+      ...prev,
+      [id]: ((prev[id] || 0) + 1) % total,
+    }));
+  };
+  const anteriorImagen = (id, total) => {
+    setImagenActual(prev => ({
+      ...prev,
+      [id]: ((prev[id] || 0) - 1 + total) % total,
+    }));
+  };
 
   useEffect(() => {
     cargarInmuebles();
@@ -265,40 +285,99 @@ export default function Inmuebles() {
               }`}
             >
               {/* Imagen */}
-              <div className="relative h-48 bg-gray-200 overflow-hidden">
-                {inmueble.imagenes_urls?.[0] ? (
-                  <img
-                    src={inmueble.imagenes_urls[0]}
-                    alt={inmueble.titulo}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
-                    <Home size={48} className="text-gray-500 opacity-50" />
-                  </div>
-                )}
+                  
+                <div className="relative h-48 bg-gray-200 overflow-hidden group">
 
-                {/* Overlay oscuro sutil */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+  {inmueble.imagenes_urls?.length > 0 ? (
+    <>
+      <img
+        src={inmueble.imagenes_urls[imagenActual[inmueble.id] || 0]}
+        alt={inmueble.titulo}
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
 
-                {/* Badges */}
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                    obtenerColorEstado(inmueble.estado)
-                  }`}>
-                    {obtenerTextoEstado(inmueble.estado)}
-                  </span>
-                </div>
+      {inmueble.imagenes_urls.length > 1 && (
+        <>
+          {/* Flecha izquierda */}
+          <button
+            onClick={() =>
+              anteriorImagen(
+                inmueble.id,
+                inmueble.imagenes_urls.length
+              )
+            }
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition"
+          >
+            <ChevronLeft size={18} />
+          </button>
 
-                <div className="absolute top-3 left-3">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                    style={{ backgroundColor: colors.primary }}>
-                    {inmueble.tipo}
-                  </span>
-                </div>
-              </div>
+          {/* Flecha derecha */}
+          <button
+            onClick={() =>
+              siguienteImagen(
+                inmueble.id,
+                inmueble.imagenes_urls.length
+              )
+            }
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
 
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+
+      {/* Badge tipo */}
+      <div className="absolute top-3 left-3">
+        <span
+          className="px-3 py-1 rounded-full text-xs font-semibold text-white"
+          style={{ backgroundColor: colors.primary }}
+        >
+          {inmueble.tipo}
+        </span>
+      </div>
+
+      {/* Badge estado */}
+      <div className="absolute top-3 right-3">
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${obtenerColorEstado(
+            inmueble.estado
+          )}`}
+        >
+          {obtenerTextoEstado(inmueble.estado)}
+        </span>
+      </div>
+    </>
+  ) : (
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+      <Home size={50} className="text-gray-500 opacity-50" />
+    </div>
+  )}
+</div>
+
+{/* Indicadores */}
+{inmueble.imagenes_urls?.length > 1 && (
+  <div className="flex justify-center gap-2 py-3">
+    {inmueble.imagenes_urls.map((_, i) => (
+      <button
+        key={i}
+        onClick={() =>
+          setImagenActual(prev => ({
+            ...prev,
+            [inmueble.id]: i,
+          }))
+        }
+        className={`w-2.5 h-2.5 rounded-full transition-all ${
+          (imagenActual[inmueble.id] || 0) === i
+            ? 'bg-pink-500 scale-125'
+            : 'bg-gray-400'
+        }`}
+      />
+    ))}
+  </div>
+)}
               {/* Contenido */}
               <div className="p-4 space-y-3 flex-1 flex flex-col">
                 {/* Título */}
