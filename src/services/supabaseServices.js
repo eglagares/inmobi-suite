@@ -191,98 +191,7 @@ export const inmuebleService = {
   },
 };
 
-// Servicios para la tabla CLIENTES
-export const clienteService = {
-  // Obtener todos los clientes
-  async getAll() {
-    try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .select(`
-          *,
-          agente:agente_id (
-            nombre,
-            email
-          )
-        `)
-        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Obtener clientes por agente
-  async getByAgente(agente_id) {
-    try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .select('*')
-        .eq('agente_id', agente_id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Crear cliente
-  async create(cliente) {
-    try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .insert([{
-          ...cliente,
-          created_at: new Date(),
-          updated_at: new Date(),
-        }])
-        .select();
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Actualizar cliente
-  async update(id, updates) {
-    try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .update({
-          ...updates,
-          updated_at: new Date(),
-        })
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Eliminar cliente
-  async delete(id) {
-    try {
-      const { error } = await supabase
-        .from('clientes')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      return { success: true, error: null };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  },
-};
 
 // Servicios para la tabla VISITAS
 export const visitaService = {
@@ -473,6 +382,184 @@ export const ventaService = {
       };
     } catch (err) {
       return { data: null, error: err.message };
+    }
+  },
+};
+// src/services/supabaseServices.js - Agregar esto
+
+
+
+// ===== SERVICIO DE CLIENTES =====
+export const clienteService = {
+  // CREATE - Crear nuevo cliente
+  async create(datos) {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .insert([datos])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error creando cliente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // READ - Obtener todos los clientes
+  async getAll() {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo clientes:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // READ - Obtener cliente por ID
+  async getById(id) {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo cliente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // READ - Obtener clientes por agente
+  async getByAgente(agenteId) {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('agente_id', agenteId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo clientes del agente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // READ - Buscar clientes
+  async search(criterios) {
+    try {
+      let query = supabase.from('clientes').select('*');
+
+      if (criterios.nombre) {
+        query = query.ilike('nombre', `%${criterios.nombre}%`);
+      }
+
+      if (criterios.email) {
+        query = query.ilike('email', `%${criterios.email}%`);
+      }
+
+      if (criterios.ciudad) {
+        query = query.ilike('ciudad', `%${criterios.ciudad}%`);
+      }
+
+      if (criterios.tipo_cliente) {
+        query = query.eq('tipo_cliente', criterios.tipo_cliente);
+      }
+
+      if (criterios.estado) {
+        query = query.eq('estado', criterios.estado);
+      }
+
+      if (criterios.presupuesto_min) {
+        query = query.gte('presupuesto_max', criterios.presupuesto_min);
+      }
+
+      if (criterios.presupuesto_max) {
+        query = query.lte('presupuesto_min', criterios.presupuesto_max);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error buscando clientes:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // UPDATE - Actualizar cliente
+  async update(id, datos) {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .update({
+          ...datos,
+          updated_at: new Date(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error actualizando cliente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+
+  // DELETE - Eliminar cliente
+  async delete(id) {
+    try {
+      const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error eliminando cliente:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // STATS - Obtener estadísticas
+  async getStats() {
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('id, tipo_cliente, estado');
+
+      if (error) throw error;
+
+      const stats = {
+        total: data.length,
+        compradores: data.filter(c => c.tipo_cliente === 'comprador').length,
+        vendedores: data.filter(c => c.tipo_cliente === 'vendedor').length,
+        arrendatarios: data.filter(c => c.tipo_cliente === 'arrendatario').length,
+        activos: data.filter(c => c.estado === 'activo').length,
+        inactivos: data.filter(c => c.estado === 'inactivo').length,
+      };
+
+      return { data: stats, error: null };
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
+      return { data: null, error: error.message };
     }
   },
 };

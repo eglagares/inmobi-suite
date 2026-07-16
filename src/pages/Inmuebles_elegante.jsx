@@ -327,7 +327,7 @@ export default function Inmuebles() {
       )}
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+      <div className="absolute inset-0 pointer-events-none bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
 
       {/* Badge tipo */}
       <div className="absolute top-3 left-3">
@@ -419,7 +419,7 @@ export default function Inmuebles() {
                     </div>
                   )}
 
-                  {inmueble.dormitorios != null && (
+                  {(inmueble.dormitorios != null || inmueble.dormitorios >= 0) && (
                     <div className="text-center">
                       <Bed size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
                       <p className={`text-xs font-semibold ${

@@ -7,13 +7,11 @@ import { SupabaseProvider } from './context/SupabaseContext';
 // Páginas de IA
 import AIHub from './pages/AIHub';
 import AISettings from './pages/AISettings';
-
-
 // Páginas
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inmuebles from './pages/Inmuebles_elegante';
-import Clientes from './pages/Clientes';
+import Clientes from './pages/Clientes_CRUD_COMPLETO';
 import Visitas from './pages/Visitas';
 import Contratos from './pages/Contratos';
 import Ventas from './pages/Ventas';
