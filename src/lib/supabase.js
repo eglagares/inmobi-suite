@@ -15,8 +15,11 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 console.log("======== VARIABLES ========");
 console.log(import.meta.env);
-console.log("SUPABASE URL =", import.meta.env.VITE_SUPABASE_URL);
-console.log("SUPABASE KEY =", import.meta.env.VITE_SUPABASE_ANON_KEY);
+console.log("MODE:", import.meta.env.MODE);
+console.log("DEV:", import.meta.env.DEV);
+console.log("PROD:", import.meta.env.PROD);
+console.log("VITE_SUPABASE_URL:", import.meta.env.VITE_SUPABASE_URL);
+console.log("VITE_SUPABASE_ANON_KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
 console.log("===========================");
 
 
