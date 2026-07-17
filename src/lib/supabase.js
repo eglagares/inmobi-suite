@@ -26,3 +26,8 @@ export const supabase = createClient(
 
 // Exportar para uso en la app
 export default supabase;
+
+
+console.log("SUPABASE_URL:", import.meta.env.VITE_SUPABASE_URL);
+console.log("SUPABASE_KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY ? "OK" : "NO");
+console.log("ENV:", import.meta.env);
