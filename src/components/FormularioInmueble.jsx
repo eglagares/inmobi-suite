@@ -3,6 +3,9 @@ import { X, Upload, Trash2, Check, AlertCircle } from 'lucide-react';
 import { inmuebleService } from '../services/supabaseServices';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../context/ThemeContext';
+import MapaInmueble from './MapaInmueble';
+import { useMapEvents } from 'react-leaflet';
+
 
 export default function FormularioInmueble({ 
   inmuebleId = null, 
@@ -28,6 +31,8 @@ export default function FormularioInmueble({
     banos: '',
     ubicacion: '',
     ciudad: '',
+    latitud: '',
+    longitud: '',
     estado: 'disponible',
     imagenes_urls: [],
     caracteristicas: [],
@@ -57,6 +62,8 @@ export default function FormularioInmueble({
         banos: data.banos || '',
         ubicacion: data.ubicacion || '',
         ciudad: data.ciudad || '',
+        latitud: data.latitud || '',
+        longitud: data.longitud || '',
         estado: data.estado || 'disponible',
         imagenes_urls: data.imagenes_urls || [],
         caracteristicas: data.caracteristicas || [],
@@ -168,28 +175,25 @@ export default function FormularioInmueble({
     setGuardando(true);
 
     try {
-      //const datosParaGuardar = {
-       // ...formData,
-        //precio: parseFloat(formData.precio),
-        //area: formData.area ? parseInt(formData.area) : null,
-        //dormitorios: formData.dormitorios ? parseInt(formData.dormitorios) : null,
-       // banos: formData.banos ? parseInt(formData.banos) : null,
-     // };
-const datosParaGuardar = {
-  titulo: formData.titulo,
-  descripcion: formData.descripcion,
-  tipo: formData.tipo,
-  precio: parseFloat(formData.precio),
-  area: formData.area ? parseInt(formData.area) : null,
-  dormitorios: formData.dormitorios ? parseInt(formData.dormitorios) : null,
-  banos: formData.banos ? parseInt(formData.banos) : null,
-  ubicacion: formData.ubicacion,
-  ciudad: formData.ciudad,
-  estado: formData.estado,
-  imagenes_urls: formData.imagenes_urls,
-  caracteristicas: formData.caracteristicas,
-  agente_id: formData.agente_id,
-};
+
+      const datosParaGuardar = {
+        titulo: formData.titulo,
+        descripcion: formData.descripcion,
+        tipo: formData.tipo,
+        precio: parseFloat(formData.precio),
+        area: formData.area ? parseInt(formData.area) : null,
+        dormitorios: formData.dormitorios ? parseInt(formData.dormitorios) : null,
+        banos: formData.banos ? parseInt(formData.banos) : null,
+        ubicacion: formData.ubicacion,
+        ciudad: formData.ciudad,
+        latitud: formData.latitud,
+        longitud: formData.longitud,
+        estado: formData.estado,
+        imagenes_urls: formData.imagenes_urls,
+        caracteristicas: formData.caracteristicas,
+
+        agente_id: formData.agente_id,
+      };
       let resultado;
 
       if (inmuebleId) {
@@ -227,11 +231,51 @@ const datosParaGuardar = {
     );
   }
 
+
+
+const obtenerDireccion = async (lat, lng) => {
+
+  try {
+
+    const respuesta = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+
+    const datos = await respuesta.json();
+
+    setFormData(prev => ({
+      ...prev,
+
+      ubicacion:
+        datos.address.road
+          ? `${datos.address.road}${datos.address.house_number ? " " + datos.address.house_number : ""}`
+          : "",
+
+      ciudad:
+        datos.address.city ||
+        datos.address.town ||
+        datos.address.village ||
+        datos.address.municipality ||
+        "",
+
+    }));
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+};
+
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
       <div className={`rounded-lg shadow-2xl w-full max-w-2xl m-4 ${
         isDarkMode ? 'bg-slate-800' : 'bg-white'
       }`}>
+
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b"
           style={{ borderColor: isDarkMode ? '#475569' : '#e5e7eb' }}>
@@ -358,7 +402,21 @@ const datosParaGuardar = {
               </select>
             </div>
           </div>
+  {/* LLAMADA AL AMAPA DE GOOGLE */}
+        <MapaInmueble
+            latitud={formData.latitud || 40.4168}
+            longitud={formData.longitud || -3.7038}
+            titulo={formData.titulo}
+            onChangePosition={(lat, lng) => {
+              setFormData(prev => ({
+                  ...prev,
+                  latitud: lat,
+                  longitud: lng,
+              }));
 
+              obtenerDireccion(lat, lng);
+            }}
+        />
           {/* Fila 3: Ubicación y Ciudad */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -402,7 +460,52 @@ const datosParaGuardar = {
             </div>
           </div>
 
-          {/* Fila 4: Área, Dormitorios, Baños */}
+        
+  {/* Fila 4: Latitud y Longitud */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+              <label className={`block text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-slate-300' : 'text-gray-700'
+              }`}>
+                Latitud
+              </label>
+              <input
+                type="number"
+                name="latitud"
+                value={formData.latitud}
+                onChange={handleInputChange}
+                placeholder="Ej: 40.4168"
+               className={`w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? 'bg-slate-700 border border-slate-600 text-white'
+                    : 'bg-white border border-gray-300'
+                }`}
+              />
+            </div>
+             
+         <div>
+              <label className={`block text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-slate-300' : 'text-gray-700'
+              }`}>
+                Longitud
+              </label>
+              <input
+                type="number"
+                name="longitud"
+                value={formData.longitud}
+                onChange={handleInputChange}
+                placeholder="Ej: -3.7038"
+                className={`w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? 'bg-slate-700 border border-slate-600 text-white'
+                    : 'bg-white border border-gray-300'
+                }`}
+              />
+            </div>
+            </div>   
+        
+       
+          {/* Fila 5: Área, Dormitorios, Baños */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${
@@ -424,7 +527,7 @@ const datosParaGuardar = {
                 }`}
               />
             </div>
-
+   
             <div>
               <label className={`block text-sm font-medium mb-2 ${
                 isDarkMode ? 'text-slate-300' : 'text-gray-700'

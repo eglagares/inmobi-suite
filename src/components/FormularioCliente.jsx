@@ -12,6 +12,7 @@ export default function FormularioCliente({
 }) {
 
 
+
   const { isDarkMode, colors } = useTheme();
   const { user } = useSupabase();
   const [loading, setLoading] = useState(false);
@@ -153,6 +154,7 @@ export default function FormularioCliente({
   }
 
   return (
+
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
       <div className={`rounded-lg shadow-2xl w-full max-w-2xl m-4 ${
         isDarkMode ? 'bg-slate-800' : 'bg-white'
@@ -171,6 +173,7 @@ export default function FormularioCliente({
           >
             <X size={24} />
           </button>
+           
         </div>
 
         {/* Contenido */}
@@ -456,5 +459,6 @@ export default function FormularioCliente({
         </div>
       </div>
     </div>
+
   );
 }
