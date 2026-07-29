@@ -1,16 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Building2, Users, Calendar, TrendingUp, Heart, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { dashboardService } from '../services/supabaseServices';
 
 export default function Dashboard() {
   const { user } = useAuth();
 
+  const [totales, setTotales] = useState({
+    inmuebles: 0,
+    clientes: 0,
+    visitas: 0,
+    disponibles: 0
+  });
+
+  useEffect(() => {
+    cargarDashboard();
+  }, []);
+
+  async function cargarDashboard() {
+    const { data, error } = await dashboardService.getTotales();
+
+    if (!error) {
+      setTotales(data);
+    } else {
+      console.error(error);
+    }
+  }
+
   const stats = [
-    { label: 'Inmuebles Activos', value: '42', icon: Building2, color: 'bg-blue-100', iconColor: 'text-blue-600' },
-    { label: 'Clientes', value: '128', icon: Users, color: 'bg-green-100', iconColor: 'text-green-600' },
-    { label: 'Visitas Programadas', value: '15', icon: Calendar, color: 'bg-orange-100', iconColor: 'text-orange-600' },
-    { label: 'Ingresos Este Mes', value: '$45,230', icon: DollarSign, color: 'bg-purple-100', iconColor: 'text-purple-600' },
-  ];
+  {
+    label: 'Inmuebles',
+    value: totales.inmuebles,
+    icon: Building2,
+    color: 'bg-blue-100',
+    iconColor: 'text-blue-600'
+  },
+  {
+    label: 'Clientes',
+    value: totales.clientes,
+    icon: Users,
+    color: 'bg-green-100',
+    iconColor: 'text-green-600'
+  },
+  {
+    label: 'Visitas',
+    value: totales.visitas,
+    icon: Calendar,
+    color: 'bg-orange-100',
+    iconColor: 'text-orange-600'
+  },
+  {
+    label: 'Disponibles',
+    value: totales.disponibles,
+    icon: Building2,
+    color: 'bg-purple-100',
+    iconColor: 'text-purple-600'
+  }
+];
 
   const recentProperties = [
     { id: 1, name: 'Apartamento Moderno Centro', price: '$250,000', bedrooms: 3, status: 'Activo' },

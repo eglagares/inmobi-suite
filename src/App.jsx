@@ -12,11 +12,10 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inmuebles from './pages/Inmuebles_elegante';
 import Clientes from './pages/Clientes_CRUD_COMPLETO';
-import Visitas from './pages/Visitas';
 import Contratos from './pages/Contratos';
 import Ventas from './pages/Ventas';
 import Estadisticas from './pages/Estadisticas';
-
+import Visitas from './pages/Visitas_CRUD_COMPLETO';
 
 
 // Layout

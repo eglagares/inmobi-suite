@@ -193,100 +193,6 @@ export const inmuebleService = {
 
 
 
-// Servicios para la tabla VISITAS
-export const visitaService = {
-  // Obtener todas las visitas
-  async getAll() {
-    try {
-      const { data, error } = await supabase
-        .from('visitas')
-        .select(`
-          *,
-          inmueble:inmueble_id (
-            titulo,
-            precio
-          ),
-          cliente:cliente_id (
-            nombre,
-            email
-          ),
-          agente:agente_id (
-            nombre
-          )
-        `)
-        .order('fecha', { ascending: true });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Obtener visitas por agente
-  async getByAgente(agente_id) {
-    try {
-      const { data, error } = await supabase
-        .from('visitas')
-        .select(`
-          *,
-          inmueble:inmueble_id (
-            titulo,
-            precio
-          ),
-          cliente:cliente_id (
-            nombre,
-            email
-          )
-        `)
-        .eq('agente_id', agente_id)
-        .order('fecha', { ascending: true });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Crear visita
-  async create(visita) {
-    try {
-      const { data, error } = await supabase
-        .from('visitas')
-        .insert([{
-          ...visita,
-          created_at: new Date(),
-          updated_at: new Date(),
-        }])
-        .select();
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Actualizar visita
-  async update(id, updates) {
-    try {
-      const { data, error } = await supabase
-        .from('visitas')
-        .update({
-          ...updates,
-          updated_at: new Date(),
-        })
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-};
 
 // Servicios para la tabla VENTAS
 export const ventaService = {
@@ -562,4 +468,330 @@ export const clienteService = {
       return { data: null, error: error.message };
     }
   },
+};
+// src/services/supabaseServices.js - AGREGAR ESTO
+ 
+// ===== SERVICIO DE VISITAS =====
+export const visitaService = {
+  // CREATE - Crear nueva visita
+  async create(datos) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .insert([datos])
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .single();
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error creando visita:', error);
+      console.log("cliente_id:", datos.cliente_id);
+      console.log("inmueble_id:", datos.inmueble_id);
+      console.log(datos);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener todas las visitas
+  async getAll() {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .order('fecha', { ascending: false });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo visitas:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener visita por ID
+  async getById(id) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .eq('id', id)
+        .single();
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo visita:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener visitas por cliente
+  async getByCliente(clienteId) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .eq('cliente_id', clienteId)
+        .order('fecha', { ascending: false });
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo visitas del cliente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener visitas por inmueble
+  async getByInmueble(inmuebleId) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .eq('inmueble_id', inmuebleId)
+        .order('fecha', { ascending: false });
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo visitas del inmueble:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener visitas por agente
+  async getByAgente(agenteId) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .eq('agente_id', agenteId)
+        .order('fecha', { ascending: false });
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo visitas del agente:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Obtener visitas próximas (próximos 7 días)
+  async getProximas(agenteId) {
+    try {
+      const hoy = new Date().toISOString().split('T')[0];
+      const en7Dias = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
+ 
+      const { data, error } = await supabase
+        .from('visitas')
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .eq('agente_id', agenteId)
+        .gte('fecha', hoy)
+        .lte('fecha', en7Dias)
+        .eq('estado', 'confirmada')
+        .order('fecha', { ascending: true });
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error obteniendo próximas visitas:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // READ - Buscar visitas
+  async search(criterios) {
+    try {
+      let query = supabase.from('visitas').select(`
+        *,
+        cliente:cliente_id(id, nombre, email, telefono),
+        inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+      `);
+ 
+      if (criterios.cliente_id) {
+        query = query.eq('cliente_id', criterios.cliente_id);
+      }
+ 
+      if (criterios.inmueble_id) {
+        query = query.eq('inmueble_id', criterios.inmueble_id);
+      }
+ 
+      if (criterios.estado) {
+        query = query.eq('estado', criterios.estado);
+      }
+ 
+      if (criterios.fecha) {
+        query = query.eq('fecha', criterios.fecha);
+      }
+ 
+      if (criterios.agente_id) {
+        query = query.eq('agente_id', criterios.agente_id);
+      }
+ 
+      const { data, error } = await query.order('fecha', { ascending: false });
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error buscando visitas:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // UPDATE - Actualizar visita
+  async update(id, datos) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .update({
+          ...datos,
+          updated_at: new Date(),
+        })
+        .eq('id', id)
+        .select(`
+          *,
+          cliente:cliente_id(id, nombre, email, telefono),
+          inmueble:inmueble_id(id, titulo, precio, ubicacion, imagenes_urls)
+        `)
+        .single();
+ 
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error actualizando visita:', error);
+      return { data: null, error: error.message };
+    }
+  },
+ 
+  // DELETE - Eliminar visita
+  async delete(id) {
+    try {
+      const { error } = await supabase
+        .from('visitas')
+        .delete()
+        .eq('id', id);
+ 
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error eliminando visita:', error);
+      return { success: false, error: error.message };
+    }
+  },
+ 
+  // STATS - Obtener estadísticas
+  async getStats(agenteId) {
+    try {
+      const { data, error } = await supabase
+        .from('visitas')
+        .select('id, estado')
+        .eq('agente_id', agenteId);
+ 
+      if (error) throw error;
+ 
+      const stats = {
+        total: data.length,
+        confirmadas: data.filter(v => v.estado === 'confirmada').length,
+        realizadas: data.filter(v => v.estado === 'realizada').length,
+        canceladas: data.filter(v => v.estado === 'cancelada').length,
+      };
+ 
+      return { data: stats, error: null };
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
+      return { data: null, error: error.message };
+    }
+  },
+};
+
+
+// ==========================================
+// DASHBOARD
+// ==========================================
+
+export const dashboardService = {
+
+  async getTotales() {
+
+    try {
+
+      const [
+        inmuebles,
+        clientes,
+        visitas,
+        disponibles
+      ] = await Promise.all([
+
+        supabase
+          .from('inmuebles')
+          .select('*', { count: 'exact', head: true }),
+
+        supabase
+          .from('clientes')
+          .select('*', { count: 'exact', head: true }),
+
+        supabase
+          .from('visitas')
+          .select('*', { count: 'exact', head: true }),
+
+        supabase
+          .from('inmuebles')
+          .select('*', { count: 'exact', head: true })
+          .eq('estado', 'disponible')
+
+      ]);
+
+      return {
+        data: {
+          inmuebles: inmuebles.count || 0,
+          clientes: clientes.count || 0,
+          visitas: visitas.count || 0,
+          disponibles: disponibles.count || 0
+        },
+        error: null
+      };
+
+    } catch (error) {
+
+      console.error('Error obteniendo dashboard:', error);
+
+      return {
+        data: null,
+        error: error.message
+      };
+
+    }
+
+  }
+
 };
