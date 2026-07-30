@@ -2,9 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Building2, Users, Calendar, TrendingUp, Heart, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { dashboardService } from '../services/supabaseServices';
+import DashboardMap from '../components/DashboardMap';
+import { inmuebleService } from '../services/supabaseServices';
+
+
+
 
 export default function Dashboard() {
   const { user } = useAuth();
+
+  const [mapaInmuebles, setMapaInmuebles] = useState([]);
 
   const [totales, setTotales] = useState({
     inmuebles: 0,
@@ -18,14 +25,24 @@ export default function Dashboard() {
   }, []);
 
   async function cargarDashboard() {
-    const { data, error } = await dashboardService.getTotales();
+  const mapa = await inmuebleService.getMapa();
 
-    if (!error) {
-      setTotales(data);
-    } else {
-      console.error(error);
-    }
+  if (!mapa.error) {
+      setMapaInmuebles(mapa.data);
   }
+  const [totalesRes, inmueblesRes] = await Promise.all([
+    dashboardService.getTotales(),
+    dashboardService.getInmueblesRecientes()
+  ]);
+
+  if (!totalesRes.error) {
+    setTotales(totalesRes.data);
+  }
+
+  if (!inmueblesRes.error) {
+    setRecentProperties(inmueblesRes.data);
+  }
+}
 
   const stats = [
   {
@@ -58,11 +75,9 @@ export default function Dashboard() {
   }
 ];
 
-  const recentProperties = [
-    { id: 1, name: 'Apartamento Moderno Centro', price: '$250,000', bedrooms: 3, status: 'Activo' },
-    { id: 2, name: 'Casa Colonial Zona Norte', price: '$380,000', bedrooms: 4, status: 'Pendiente' },
-    { id: 3, name: 'Oficina Comercial Piso 5', price: '$150,000', bedrooms: '-', status: 'Activo' },
-  ];
+  const [recentProperties, setRecentProperties] = useState([]);
+
+
 
   const recentVisits = [
     { id: 1, property: 'Apartamento Centro', client: 'Juan García', date: '15 Dic, 14:00', status: 'Confirmada' },
@@ -115,29 +130,72 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Inmuebles Recientes</h2>
           <div className="space-y-4">
-            {recentProperties.map((property) => (
-              <div key={property.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
-                    <Building2 className="text-white" size={20} />
+           {recentProperties.map((property) => (
+                <div
+                  key={property.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+
+                   <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200">
+
+                    {property.imagenes_urls?.length > 0 ? (
+
+                      <img
+                        src={property.imagenes_urls[0]}
+                        alt={property.titulo}
+                        className="w-full h-full object-cover"
+                      />
+
+                    ) : (
+
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                        <Building2 className="text-white" size={20} />
+                      </div>
+
+                    )}
+
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{property.name}</p>
-                    <p className="text-xs text-gray-500">{property.bedrooms} dormitorios</p>
+
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">
+                        {property.titulo}
+                      </p>
+
+                      <p className="text-xs text-gray-500">
+                      {property.dormitorios ?? '-'} dormitorios
+                      </p>
+                    </div>
+
                   </div>
+
+                  <div className="text-right">
+
+                    <p className="font-semibold text-gray-900">
+                    {Number(property.precio).toLocaleString('es-ES', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })} €
+                    </p>
+
+                    <p
+                      className={`text-xs px-2 py-1 rounded inline-block ${
+                        property.estado === 'disponible'
+                          ? 'bg-green-100 text-green-700'
+                          : property.estado === 'vendido'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                     {property.estado
+                          ? property.estado.charAt(0).toUpperCase() + property.estado.slice(1)
+                          : ''}
+                    </p>
+
+                  </div>
+
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">{property.price}</p>
-                  <p className={`text-xs px-2 py-1 rounded inline-block ${
-                    property.status === 'Activo' 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {property.status}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
@@ -164,7 +222,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
+<DashboardMap inmuebles={mapaInmuebles} />
       {/* Recent Visits */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
         <h2 className="text-lg font-bold text-gray-900 mb-4">Próximas Visitas</h2>

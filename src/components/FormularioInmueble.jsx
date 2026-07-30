@@ -51,7 +51,9 @@ export default function FormularioInmueble({
     try {
       const { data, error: err } = await inmuebleService.getById(inmuebleId);
       if (err) throw err;
-      
+    console.log("Latitud:", data.latitud);
+    console.log("Longitud:", data.longitud);
+    console.log(data);
       setFormData({
         titulo: data.titulo || '',
         descripcion: data.descripcion || '',
@@ -186,12 +188,13 @@ export default function FormularioInmueble({
         banos: formData.banos ? parseInt(formData.banos) : null,
         ubicacion: formData.ubicacion,
         ciudad: formData.ciudad,
-        latitud: formData.latitud,
-        longitud: formData.longitud,
+
+        latitud: formData.latitud === '' ? null : parseFloat(formData.latitud),
+        longitud: formData.longitud === '' ? null : parseFloat(formData.longitud),
+
         estado: formData.estado,
         imagenes_urls: formData.imagenes_urls,
         caracteristicas: formData.caracteristicas,
-
         agente_id: formData.agente_id,
       };
       let resultado;
@@ -245,6 +248,9 @@ const obtenerDireccion = async (lat, lng) => {
 
     setFormData(prev => ({
       ...prev,
+
+      latitud: lat,
+      longitud: lng,
 
       ubicacion:
         datos.address.road

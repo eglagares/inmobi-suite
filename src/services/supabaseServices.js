@@ -23,6 +23,44 @@ export const inmuebleService = {
       return { data: null, error: err.message };
     }
   },
+//Mapa de inmuebles en el dashboard
+// Obtener inmuebles para el mapa
+async getMapa() {
+
+  try {
+
+    const { data, error } = await supabase
+      .from("inmuebles")
+      .select(`
+        id,
+        titulo,
+        precio,
+        estado,
+        ubicacion,
+        latitud,
+        longitud
+      `)
+      .not("latitud", "is", null)
+      .not("longitud", "is", null);
+
+    if (error) throw error;
+
+    return { data, error: null };
+
+  } catch (error) {
+
+    console.error(error);
+
+    return {
+      data: [],
+      error: error.message,
+    };
+
+  }
+
+},
+
+
 
   // Obtener inmueble por ID
   async getById(id) {
@@ -83,8 +121,12 @@ export const inmuebleService = {
   },
 
   // Actualizar inmueble
+   
   async update(id, updates) {
     try {
+
+      console.log("Datos que se envían a Supabase:");
+      console.log(updates);
       const { data, error } = await supabase
         .from('inmuebles')
         .update({
@@ -792,6 +834,39 @@ export const dashboardService = {
 
     }
 
-  }
+  },
+      async getInmueblesRecientes() {
+
+      try {
+
+        const { data, error } = await supabase
+          .from('inmuebles')
+          .select(`
+            id,
+            titulo,
+            precio,
+            estado,
+            dormitorios,
+            imagenes_urls
+          `)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error) throw error;
+
+        return { data, error: null };
+
+      } catch (error) {
+
+        console.error('Error obteniendo inmuebles recientes:', error);
+
+        return { data: null, error: error.message };
+
+      }
+
+    }
 
 };
+
+
+
