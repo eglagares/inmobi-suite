@@ -31,30 +31,22 @@ async getMapa() {
 
     const { data, error } = await supabase
       .from("inmuebles")
-      .select(`
-        id,
-        titulo,
-        precio,
-        estado,
-        ubicacion,
-        latitud,
-        longitud
-      `)
+      .select("*")
       .not("latitud", "is", null)
       .not("longitud", "is", null);
 
-    if (error) throw error;
+        if (error) throw error;
 
-    return { data, error: null };
+        return { data, error: null };
 
-  } catch (error) {
+      } catch (error) {
 
-    console.error(error);
+        console.error(error);
 
-    return {
-      data: [],
-      error: error.message,
-    };
+        return {
+          data: [],
+          error: error.message,
+        };
 
   }
 

@@ -14,6 +14,33 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 
+
+import {
+    Bed,
+    Bath,
+    Ruler,
+    MapPin,
+    Euro,
+    Pencil,
+    Home,
+    Building2,
+    Store,
+    Landmark
+} from 'lucide-react';
+
+//para navegar desde el mapa
+import { useNavigate } from 'react-router-dom';
+
+
+
+const abrirInmueble = (id) => {
+  navigate('/inmuebles', {
+    state: {
+      editarId: id,
+    },
+  });
+
+};
 const iconoDisponible = new L.Icon({
   iconUrl: greenMarker,
   shadowUrl: markerShadow,
@@ -77,10 +104,48 @@ function AutoZoom({ inmuebles }) {
 
 export default function DashboardMap({ inmuebles = [] }) {
 
+  const navigate = useNavigate();
+  const editarInmueble = (id) => {
+
+  navigate("/inmuebles", {
+    state: {
+      editarId: id,
+    },
+  });
+
+};
   const centro =
     inmuebles.length > 0
       ? [inmuebles[0].latitud, inmuebles[0].longitud]
       : [40.4168, -3.7038];
+
+  const abrirInmueble = (id) => {
+      navigate('/inmuebles', {
+        state: {
+          editarId: id,
+        },
+      });
+    };
+
+ const obtenerIconoTipo = (tipo) => {
+    switch (tipo) {
+
+      case "casa":
+        return <Home size={16} className="text-blue-600" />;
+
+      case "apartamento":
+        return <Building2 size={16} className="text-indigo-600" />;
+
+      case "local":
+        return <Store size={16} className="text-orange-600" />;
+
+      case "oficina":
+        return <Landmark size={16} className="text-purple-600" />;
+
+      default:
+        return <Building2 size={16} className="text-gray-500" />;
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
@@ -137,38 +202,133 @@ export default function DashboardMap({ inmuebles = [] }) {
                 }
             >
 
-            {inmuebles.map((inmueble) => (
-
-            <Marker
+      {inmuebles.map((inmueble) => (
+          console.log(inmueble),
+          <Marker
                 key={inmueble.id}
                 position={[inmueble.latitud, inmueble.longitud]}
                 icon={
-                  inmueble.estado === "disponible"
+                  inmueble.estado === 'disponible'
                     ? iconoDisponible
-                    : inmueble.estado === "vendido"
+                    : inmueble.estado === 'vendido'
                     ? iconoVendido
                     : iconoAlquilado
                 }
-              >
+                
+         >
 
-                <Popup>
+                <Popup minWidth={280} maxWidth={340}>
 
-                  <strong>{inmueble.titulo}</strong>
+                  <div className="w-72">
+                    <div
+                      className={`h-2 rounded-t-xl ${
+                        inmueble.estado === "disponible"
+                          ? "bg-green-500"
+                          : inmueble.estado === "vendido"
+                          ? "bg-red-500"
+                          : "bg-yellow-500"
+                      }`}
+                    />
+                    <img
+                      src={inmueble.imagenes_urls?.[0]}
+                      alt={inmueble.titulo}
+                      className="w-full h-44 object-cover rounded-xl transition-transform duration-300 hover:scale-[1.02]"
+                    />
 
-                  <br />
+                    <h3 className="font-bold text-lg mb-2">
+                      {inmueble.titulo}
+                    </h3>
+                    <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                      {obtenerIconoTipo(inmueble.tipo)}
+                      <span className="capitalize font-medium">
+                        {inmueble.tipo}
+                      </span>
+                    </div>
+                  <div className="mb-3">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                        inmueble.estado === "disponible"
+                          ? "bg-green-100 text-green-700"
+                          : inmueble.estado === "vendido"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {inmueble.estado.charAt(0).toUpperCase() + inmueble.estado.slice(1)}
+                    </span>
+                  </div>
+                   
+                    <div className="space-y-2 text-sm">
 
-                  {Number(inmueble.precio).toLocaleString("es-ES")} €
+                    <div className="flex items-center gap-2 mt-3">
+                        <Euro className="text-green-500" size={22} />
+                          <span className="text-3xl font-extrabold tracking-tight text-gray-900">
+                          {inmueble.precio.toLocaleString("es-ES")} €
+                        </span>
+                        <div className="border-b border-gray-100 my-3"></div>
+                      </div>
+                      </div>
 
-                  <br />
+                      <div className="flex items-center gap-2">
+                      <span className="text-gray-600">
+                        {inmueble.ubicacion}</span>
+                      </div>
 
-                  {inmueble.ubicacion}
+                      <div className="flex items-center justify-between mt-3">
 
-                  <br />
+                        <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-center gap-2">
+                      <Bed size={18} />
+                      <span>{inmueble.dormitorios ?? 0}</span>
+                    </div>
+                        </div>
 
-                  Estado: {inmueble.estado}
+                        <div className="flex items-center gap-1">
+                       
+                        <div className="flex items-center justify-center gap-2">
+                          <Bath size={18} />
+                          <span>{inmueble.banos ?? 0}</span>
+                        </div>
+                        </div>
 
+                        <div className="flex items-center gap-1">
+                         <div className="flex items-center justify-center gap-2">
+                                <Ruler size={18} />
+                                <span>{inmueble.area ?? 0} m²</span>
+                              </div>
+                        </div>
+
+                      </div>
+                      <button
+                        onClick={() => editarInmueble(inmueble.id)}
+                        className="
+                          mt-5
+                          w-full
+                          flex
+                          items-center
+                          justify-center
+                          gap-2
+                          rounded-lg
+                          bg-pink-600
+                          text-white
+                          py-2.5
+                          font-medium
+                          hover:bg-pink-700
+                          transition-all
+                          duration-200
+                          hover:scale-[1.02]
+                          active:scale-95
+                          duration-200
+                        "
+                      >
+
+                        <Pencil size={18} />
+
+                        Editar inmueble
+
+                      </button>
+                    </div>
                 </Popup>
-
               </Marker>
 
             ))}

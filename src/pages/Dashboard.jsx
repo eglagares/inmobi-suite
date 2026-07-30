@@ -5,12 +5,20 @@ import { dashboardService } from '../services/supabaseServices';
 import DashboardMap from '../components/DashboardMap';
 import { inmuebleService } from '../services/supabaseServices';
 
-
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Dashboard() {
   const { user } = useAuth();
-
+  //navegación en el mapa del dashboard
+  const navigate = useNavigate();
+  const abrirInmueble = (id) => {
+    navigate('/inmuebles', {
+      state: {
+        editarId: id,
+      },
+    });
+  };
   const [mapaInmuebles, setMapaInmuebles] = useState([]);
 
   const [totales, setTotales] = useState({
@@ -131,10 +139,12 @@ export default function Dashboard() {
           <h2 className="text-lg font-bold text-gray-900 mb-4">Inmuebles Recientes</h2>
           <div className="space-y-4">
            {recentProperties.map((property) => (
-                <div
-                  key={property.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                >
+               <div
+                    key={property.id}
+                    //para navegar al inmueble
+                    onClick={() => abrirInmueble(property.id)}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              >  
                   <div className="flex items-center gap-4 flex-1">
 
                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200">

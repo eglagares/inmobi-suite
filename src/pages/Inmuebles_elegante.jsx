@@ -8,8 +8,7 @@ import { Search, MapPin, Home, DollarSign, Maximize2, Bed, Bath, Plus, Edit3, Tr
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-
-
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Inmuebles() {
   const { user } = useSupabase();
@@ -27,6 +26,9 @@ export default function Inmuebles() {
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [inmuebleEliminar, setInmuebleEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   //carrusel de imágenes de inmueble
   const [imagenActual, setImagenActual] = useState({});
@@ -50,6 +52,29 @@ export default function Inmuebles() {
   useEffect(() => {
     aplicarFiltros();
   }, [inmuebles, busqueda, filtroTipo, filtroEstado]);
+
+
+  useEffect(() => {
+
+  if (location.state?.editarId && inmuebles.length > 0) {
+
+    const inmueble = inmuebles.find(
+      i => i.id === location.state.editarId
+    );
+
+    if (inmueble) {
+      abrirFormularioEditar(inmueble);
+
+      // Limpiar el state para que no vuelva a abrirse
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
+
+  }
+
+}, [location.state, inmuebles]);
 
   const cargarInmuebles = async () => {
     setLoading(true);
