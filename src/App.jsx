@@ -12,7 +12,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inmuebles from './pages/Inmuebles_elegante';
 import Clientes from './pages/Clientes_CRUD_COMPLETO';
-import Contratos from './pages/Contratos';
+import Contratos from './pages/Contratos_CRUD_COMPLETO';
 import Ventas from './pages/Ventas';
 import Estadisticas from './pages/Estadisticas';
 import Visitas from './pages/Visitas_CRUD_COMPLETO';
