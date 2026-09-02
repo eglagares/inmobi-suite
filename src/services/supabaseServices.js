@@ -862,222 +862,184 @@ export const dashboardService = {
 
 // Servicios para tabla CONTRATOS - Copiar a supabaseServices.js
 
+// ✅ VERSIÓN SIN ERROR 400
 export const contratoService = {
   // Obtener todos los contratos
   async getAll() {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo, precio, ubicacion),
-          cliente:cliente_id(id, nombre, email, telefono),
-          agente:agente_id(id, nombre, email)
-        `)
+        .select('*')  // ← SELECT simple
         .order('created_at', { ascending: false });
-
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getAll:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Obtener contrato por ID
   async getById(id) {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo, precio, ubicacion, dormitorios, banos, area),
-          cliente:cliente_id(id, nombre, email, telefono, tipo_cliente),
-          agente:agente_id(id, nombre, email)
-        `)
+        .select('*')  // ← SELECT simple
         .eq('id', id)
         .single();
-
+ 
       if (error) throw error;
       return { data, error: null };
     } catch (err) {
+      console.error('Error getById:', err);
       return { data: null, error: err.message };
     }
   },
-
-  // Obtener contratos por agente
- async getByAgente(agente_id) {
-
-  try {
-
-    console.log("agente_id recibido:", agente_id);
-
-    const { data, error } = await supabase
-      .from('contratos')
-      .select('*')
-      .eq('agente_id', agente_id)
-      .order('fecha_inicio', { ascending: false });
-
-    console.log("DATA contratos:", data);
-    console.log("ERROR Supabase:", error);
-
-    if (error) throw error;
-
-    return {
-      data,
-      error: null
-    };
-
-  } catch (err) {
-
-    console.error("ERROR getByAgente:", err);
-
-    return {
-      data: null,
-      error: err
-    };
-
-  }
-
-},
-
+ 
+  // ✅ ARREGLADO: Obtener contratos por agente (SIN error 400)
+  async getByAgente(agente_id) {
+    try {
+      // SELECT simple - SIN JOINS
+      const { data, error } = await supabase
+        .from('contratos')
+        .select('*')  // ← SELECT simple
+        .eq('agente_id', agente_id)
+        .order('created_at', { ascending: false });
+ 
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByAgente:', err);
+      return { data: [], error: err.message };
+    }
+  },
+ 
   // Obtener contratos por cliente
   async getByCliente(cliente_id) {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo, precio),
-          agente:agente_id(id, nombre)
-        `)
+        .select('*')
         .eq('cliente_id', cliente_id)
-        .order('fecha_inicio', { ascending: false });
-
+        .order('created_at', { ascending: false });
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getByCliente:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Obtener contratos por inmueble
   async getByInmueble(inmueble_id) {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          cliente:cliente_id(id, nombre),
-          agente:agente_id(id, nombre)
-        `)
+        .select('*')
         .eq('inmueble_id', inmueble_id)
-        .order('fecha_inicio', { ascending: false });
-
+        .order('created_at', { ascending: false });
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getByInmueble:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Obtener contratos pendientes de firma
   async getPendientesFirma(agente_id) {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo),
-          cliente:cliente_id(id, nombre, email)
-        `)
+        .select('*')
         .eq('agente_id', agente_id)
         .eq('estado', 'pendiente_firma')
         .order('created_at', { ascending: true });
-
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getPendientesFirma:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Obtener contratos por estado
   async getByEstado(estado, agente_id = null) {
     try {
       let query = supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo),
-          cliente:cliente_id(id, nombre)
-        `)
+        .select('*')
         .eq('estado', estado);
-
+ 
       if (agente_id) {
         query = query.eq('agente_id', agente_id);
       }
-
+ 
       const { data, error } = await query.order('created_at', { ascending: false });
-
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getByEstado:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Crear contrato
   async create(contrato) {
     try {
-      // Generar número único de contrato si no existe
       if (!contrato.numero_contrato) {
         const timestamp = Date.now();
         contrato.numero_contrato = `CONT-${timestamp}`;
       }
-
-      // Calcular comisión si no está calculada
-      if (!contrato.comision_monto && contrato.comision_porcentaje) {
+ 
+      if (!contrato.comision_monto && contrato.comision_porcentaje && contrato.precio_total) {
         contrato.comision_monto = (contrato.precio_total * contrato.comision_porcentaje) / 100;
       }
-
+ 
       const { data, error } = await supabase
         .from('contratos')
         .insert([contrato])
         .select();
-
+ 
       if (error) throw error;
-      return { data: data?.[0], error: null };
+      return { data: data?.[0] || null, error: null };
     } catch (err) {
+      console.error('Error create:', err);
       return { data: null, error: err.message };
     }
   },
-
+ 
   // Actualizar contrato
   async update(id, contrato) {
     try {
-      // Calcular comisión si cambió
       if (contrato.comision_porcentaje && contrato.precio_total) {
         contrato.comision_monto = (contrato.precio_total * contrato.comision_porcentaje) / 100;
       }
-
+ 
       const { data, error } = await supabase
         .from('contratos')
         .update(contrato)
         .eq('id', id)
         .select();
-
+ 
       if (error) throw error;
-      return { data: data?.[0], error: null };
+      return { data: data?.[0] || null, error: null };
     } catch (err) {
+      console.error('Error update:', err);
       return { data: null, error: err.message };
     }
   },
-
-  // Firmar contrato (cliente o agente)
+ 
+  // Firmar contrato
   async firmarContrato(id, tipo_firma, fecha_firma = new Date().toISOString().split('T')[0]) {
     try {
       const updateData = {};
-
+ 
       if (tipo_firma === 'cliente') {
         updateData.firmado_cliente = true;
         updateData.fecha_firma_cliente = fecha_firma;
@@ -1085,32 +1047,32 @@ export const contratoService = {
         updateData.firmado_agente = true;
         updateData.fecha_firma_agente = fecha_firma;
       }
-
-      // Si ambos han firmado, cambiar estado a firmado
+ 
       const contratoActual = await this.getById(id);
       if (contratoActual.data) {
         const firmadoCliente = updateData.firmado_cliente || contratoActual.data.firmado_cliente;
         const firmadoAgente = updateData.firmado_agente || contratoActual.data.firmado_agente;
-
+ 
         if (firmadoCliente && firmadoAgente) {
           updateData.estado = 'firmado';
           updateData.fecha_firma = fecha_firma;
         }
       }
-
+ 
       const { data, error } = await supabase
         .from('contratos')
         .update(updateData)
         .eq('id', id)
         .select();
-
+ 
       if (error) throw error;
-      return { data: data?.[0], error: null };
+      return { data: data?.[0] || null, error: null };
     } catch (err) {
+      console.error('Error firmarContrato:', err);
       return { data: null, error: err.message };
     }
   },
-
+ 
   // Cambiar estado
   async cambiarEstado(id, nuevoEstado) {
     try {
@@ -1119,14 +1081,15 @@ export const contratoService = {
         .update({ estado: nuevoEstado })
         .eq('id', id)
         .select();
-
+ 
       if (error) throw error;
-      return { data: data?.[0], error: null };
+      return { data: data?.[0] || null, error: null };
     } catch (err) {
+      console.error('Error cambiarEstado:', err);
       return { data: null, error: err.message };
     }
   },
-
+ 
   // Subir documento
   async subirDocumento(id, archivo, tipo = 'documento') {
     try {
@@ -1134,74 +1097,71 @@ export const contratoService = {
       const { data, error } = await supabase.storage
         .from('contratos')
         .upload(nombreArchivo, archivo);
-
+ 
       if (error) throw error;
-
+ 
       const urlPublica = `${process.env.VITE_SUPABASE_URL}/storage/v1/object/public/contratos/${data.path}`;
-
-      // Actualizar contrato con URL del documento
+ 
       if (tipo === 'documento') {
         await this.update(id, { documento_url: urlPublica });
       } else if (tipo === 'pdf') {
         await this.update(id, { documento_pdf_url: urlPublica });
       }
-
+ 
       return { data: urlPublica, error: null };
     } catch (err) {
+      console.error('Error subirDocumento:', err);
       return { data: null, error: err.message };
     }
   },
-
-  // Obtener historial del contrato
+ 
+  // Obtener historial
   async getHistorial(id) {
     try {
       const { data, error } = await supabase
         .from('contratos_historial')
-        .select(`
-          *,
-          usuario:realizado_por(id, nombre)
-        `)
+        .select('*')
         .eq('contrato_id', id)
         .order('created_at', { ascending: false });
-
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error getHistorial:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Buscar contratos
   async search(termino) {
     try {
       const { data, error } = await supabase
         .from('contratos')
-        .select(`
-          *,
-          inmueble:inmueble_id(id, titulo),
-          cliente:cliente_id(id, nombre)
-        `)
+        .select('*')
         .or(`numero_contrato.ilike.%${termino}%,titulo.ilike.%${termino}%`)
         .order('created_at', { ascending: false });
-
+ 
       if (error) throw error;
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (err) {
-      return { data: null, error: err.message };
+      console.error('Error search:', err);
+      return { data: [], error: err.message };
     }
   },
-
+ 
   // Obtener estadísticas
   async getStats(agente_id = null) {
     try {
       let query = supabase.from('contratos').select('*', { count: 'exact' });
-
+ 
       if (agente_id) {
         query = query.eq('agente_id', agente_id);
       }
-
-      const { count, data } = await query;
-
+ 
+      const { data, count, error } = await query;
+ 
+      if (error) throw error;
+ 
       const stats = {
         total: count || 0,
         borradores: 0,
@@ -1209,26 +1169,24 @@ export const contratoService = {
         firmados: 0,
         completados: 0,
         cancelados: 0,
-        valor_total: 0,
-        comisiones_pendientes: 0,
       };
-
+ 
       if (data) {
         data.forEach(contrato => {
-          stats[`${contrato.estado}s`]++;
-          stats.valor_total += contrato.precio_total || 0;
-          if (contrato.estado !== 'completado' && contrato.estado !== 'cancelado') {
-            stats.comisiones_pendientes += contrato.comision_monto || 0;
+          const estado = contrato.estado;
+          if (stats[`${estado}s`] !== undefined) {
+            stats[`${estado}s`]++;
           }
         });
       }
-
+ 
       return { data: stats, error: null };
     } catch (err) {
+      console.error('Error getStats:', err);
       return { data: null, error: err.message };
     }
   },
-
+ 
   // Eliminar contrato
   async delete(id) {
     try {
@@ -1236,13 +1194,12 @@ export const contratoService = {
         .from('contratos')
         .delete()
         .eq('id', id);
-
+ 
       if (error) throw error;
       return { error: null };
     } catch (err) {
+      console.error('Error delete:', err);
       return { error: err.message };
     }
   }
 };
-
-
