@@ -898,22 +898,44 @@ export const contratoService = {
   },
  
   // ✅ ARREGLADO: Obtener contratos por agente (SIN error 400)
-  async getByAgente(agente_id) {
-    try {
-      // SELECT simple - SIN JOINS
-      const { data, error } = await supabase
-        .from('contratos')
-        .select('*')  // ← SELECT simple
-        .eq('agente_id', agente_id)
-        .order('created_at', { ascending: false });
- 
-      if (error) throw error;
-      return { data: data || [], error: null };
-    } catch (err) {
-      console.error('Error getByAgente:', err);
-      return { data: [], error: err.message };
-    }
-  },
+ async getByAgente(agente_id) {
+  try {
+
+    const { data, error } = await supabase
+      .from('contratos')
+      .select(`
+        *,
+        cliente:clientes (
+          id,
+          nombre
+        ),
+        inmueble:inmuebles (
+          id,
+          titulo
+        )
+      `)
+      .eq('agente_id', agente_id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    console.log('CONTRATOS CON RELACIONES:', data);
+
+    return {
+      data: data || [],
+      error: null
+    };
+
+  } catch (err) {
+
+    console.error('Error getByAgente:', err);
+
+    return {
+      data: [],
+      error: err.message
+    };
+  }
+},
  
   // Obtener contratos por cliente
   async getByCliente(cliente_id) {
