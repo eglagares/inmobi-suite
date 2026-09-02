@@ -18,6 +18,8 @@ import FormularioContrato from '../components/FormularioContrato';
 
 import { useAuth } from '../context/AuthContext';
 
+import jsPDF from 'jspdf';
+
 export default function Contratos() {
   const { isDarkMode, colors } = useTheme();
  const { user } = useAuth();
@@ -141,10 +143,310 @@ export default function Contratos() {
     }
   };
 
-  const handleDescargarPDF = (contrato) => {
-    // TODO: Implementar generación de PDF
-    alert('Descarga de PDF próximamente');
-  };
+const handleDescargarPDF = (contrato) => {
+  try {
+    const doc = new jsPDF();
+
+    const margen = 20;
+    const anchoPagina = 210;
+    const anchoContenido = 170;
+
+    let y = 20;
+
+    // =====================================================
+    // CABECERA
+    // =====================================================
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text('InMobi Suite', margen, y);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Gestión inmobiliaria', margen, y + 7);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('CONTRATO', 190, y, { align: 'right' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(
+      contrato.numero_contrato || 'Sin número',
+      190,
+      y + 7,
+      { align: 'right' }
+    );
+
+    // Línea
+    y += 18;
+    doc.line(margen, y, 190, y);
+
+    // =====================================================
+    // FUNCIÓN AUXILIAR PARA TÍTULOS
+    // =====================================================
+
+    const tituloSeccion = (texto) => {
+      y += 12;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text(texto, margen, y);
+
+      y += 3;
+      doc.line(margen, y, 190, y);
+
+      y += 8;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+    };
+
+    // =====================================================
+    // DATOS DEL CONTRATO
+    // =====================================================
+
+    tituloSeccion('Datos del contrato');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Título:', margen, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(contrato.titulo || 'N/A', margen + 35, y);
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tipo:', margen, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      contrato.tipo
+        ? contrato.tipo.charAt(0).toUpperCase() + contrato.tipo.slice(1)
+        : 'N/A',
+      margen + 35,
+      y
+    );
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Estado:', margen, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      contrato.estado
+        ? contrato.estado.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+        : 'N/A',
+      margen + 35,
+      y
+    );
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fecha inicio:', margen, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(contrato.fecha_inicio || 'N/A', margen + 35, y);
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fecha fin:', margen, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(contrato.fecha_fin || 'Sin fecha de fin', margen + 35, y);
+
+    // =====================================================
+    // CLIENTE
+    // =====================================================
+
+    tituloSeccion('Cliente');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Nombre:', margen, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      contrato.cliente?.nombre || 'N/A',
+      margen + 35,
+      y
+    );
+
+    // =====================================================
+    // INMUEBLE
+    // =====================================================
+
+    tituloSeccion('Inmueble');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Inmueble:', margen, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      contrato.inmueble?.titulo || 'N/A',
+      margen + 35,
+      y
+    );
+
+    y += 8;
+
+    // =====================================================
+    // INFORMACIÓN ECONÓMICA
+    // =====================================================
+
+    tituloSeccion('Información económica');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Precio total:', margen, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `${Number(contrato.precio_total || 0).toLocaleString('es-ES')} €`,
+      margen + 45,
+      y
+    );
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Comisión:', margen, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `${contrato.comision_porcentaje || 0}%`,
+      margen + 45,
+      y
+    );
+
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Importe comisión:', margen, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `${Number(contrato.comision_monto || 0).toLocaleString('es-ES')} €`,
+      margen + 45,
+      y
+    );
+
+    // =====================================================
+    // DESCRIPCIÓN
+    // =====================================================
+
+    if (contrato.descripcion) {
+      tituloSeccion('Descripción');
+
+      const descripcion = doc.splitTextToSize(
+        contrato.descripcion,
+        anchoContenido
+      );
+
+      doc.text(descripcion, margen, y);
+
+      y += descripcion.length * 5 + 5;
+    }
+
+    // =====================================================
+    // CONDICIONES ESPECIALES
+    // =====================================================
+
+    if (contrato.condiciones_especiales) {
+      tituloSeccion('Condiciones especiales');
+
+      const condiciones = doc.splitTextToSize(
+        contrato.condiciones_especiales,
+        anchoContenido
+      );
+
+      doc.text(condiciones, margen, y);
+
+      y += condiciones.length * 5 + 5;
+    }
+
+    // =====================================================
+    // NOTAS
+    // =====================================================
+
+    if (contrato.notas) {
+      tituloSeccion('Notas');
+
+      const notas = doc.splitTextToSize(
+        contrato.notas,
+        anchoContenido
+      );
+
+      doc.text(notas, margen, y);
+
+      y += notas.length * 5 + 5;
+    }
+
+    // =====================================================
+    // FIRMAS
+    // =====================================================
+
+    // Si estamos demasiado abajo, crear nueva página
+    if (y > 220) {
+      doc.addPage();
+      y = 30;
+    }
+
+    tituloSeccion('Firmas');
+
+    y += 10;
+
+    doc.line(25, y, 90, y);
+    doc.line(120, y, 185, y);
+
+    doc.setFontSize(9);
+    doc.text('Firma del cliente', 57, y + 7, {
+      align: 'center'
+    });
+
+    doc.text('Firma del agente', 152, y + 7, {
+      align: 'center'
+    });
+
+    // =====================================================
+    // PIE DE PÁGINA
+    // =====================================================
+
+    const paginas = doc.internal.getNumberOfPages();
+
+    for (let i = 1; i <= paginas; i++) {
+      doc.setPage(i);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+
+      doc.text(
+        `InMobi Suite · Contrato ${contrato.numero_contrato || ''}`,
+        margen,
+        290
+      );
+
+      doc.text(
+        `Página ${i} de ${paginas}`,
+        190,
+        290,
+        { align: 'right' }
+      );
+    }
+
+    // =====================================================
+    // DESCARGA
+    // =====================================================
+
+    const nombreArchivo =
+      contrato.numero_contrato
+        ? `${contrato.numero_contrato}.pdf`
+        : 'contrato.pdf';
+
+    doc.save(nombreArchivo);
+
+  } catch (error) {
+    console.error('Error generando PDF:', error);
+    alert('No se ha podido generar el PDF');
+  }
+};
+
 
   const handleVerDetalles = (contrato) => {
     setContratoSeleccionado(contrato);
