@@ -124,20 +124,17 @@ export default function FormularioContrato({
     if (!formData.fecha_inicio) {
       errores.fecha_inicio = 'La fecha de inicio es requerida';
     }
-    // ✅ ARREGLADO: Validar fecha_fin correctamente
-    // Si fecha_fin tiene valor, debe ser posterior a fecha_inicio
     if (formData.fecha_fin && formData.fecha_inicio) {
       if (new Date(formData.fecha_fin) < new Date(formData.fecha_inicio)) {
         errores.fecha_fin = 'La fecha de fin debe ser posterior a la de inicio';
       }
     }
-    // Si fecha_fin está vacío es OPCIONAL - no es error
 
     setErroresValidacion(errores);
     return Object.keys(errores).length === 0;
   };
 
-  // GUARDAR ✅ SIN DELAY y con limpieza de datos
+  // GUARDAR ✅ SIN DELAY
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -152,17 +149,9 @@ export default function FormularioContrato({
     setGuardando(true);
 
     try {
-      // ✅ ARREGLADO: Limpiar datos antes de guardar
-      // Convertir strings vacíos a null para campos opcionales
       const datos = {
         ...formData,
         agente_id: user?.id,
-        // ✅ Si fecha_fin está vacío, enviar null en lugar de ""
-        fecha_fin: formData.fecha_fin ? formData.fecha_fin : null,
-        // Otros campos opcionales también
-        descripcion: formData.descripcion || null,
-        notas: formData.notas || null,
-        condiciones_especiales: formData.condiciones_especiales || null,
       };
 
       let res;
@@ -173,8 +162,7 @@ export default function FormularioContrato({
       }
 
       if (res.error) {
-        // ✅ Mostrar error en el UI claramente
-        setError('❌ Error al guardar: ' + res.error);
+        setError('❌ Error: ' + res.error);
         setGuardando(false);
       } else {
         setExito('✅ ' + (contratoId ? 'Actualizado' : 'Creado'));
@@ -183,8 +171,7 @@ export default function FormularioContrato({
         if (onClose) onClose();
       }
     } catch (err) {
-      console.error('Error en handleSubmit:', err);
-      setError('❌ Error: ' + (err.message || 'Error desconocido'));
+      setError('❌ Error: ' + err.message);
       setGuardando(false);
     }
   };
@@ -346,7 +333,7 @@ export default function FormularioContrato({
 
             <div>
               <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                Fecha Fin (opcional)
+                Fecha Fin
               </label>
               <input
                 type="date"
@@ -358,9 +345,6 @@ export default function FormularioContrato({
                 } ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
               />
               {erroresValidacion.fecha_fin && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.fecha_fin}</p>}
-              <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                Deixa vacío si no aplica
-              </p>
             </div>
           </div>
 

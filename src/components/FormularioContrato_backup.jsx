@@ -37,7 +37,6 @@ export default function FormularioContrato({
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
-  const [erroresValidacion, setErroresValidacion] = useState({});
 
   // CARGAR DATOS AL MONTAR
   useEffect(() => {
@@ -84,13 +83,6 @@ export default function FormularioContrato({
       ...prev,
       [name]: value,
     }));
-    // Limpiar error de este campo
-    if (erroresValidacion[name]) {
-      setErroresValidacion(prev => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
     setError('');
   };
 
@@ -105,64 +97,40 @@ export default function FormularioContrato({
     }
   }, [formData.precio_total, formData.comision_porcentaje]);
 
-  // VALIDACIÓN MEJORADA ✅
-  const validar = () => {
-    const errores = {};
-
-    if (!formData.inmueble_id) {
-      errores.inmueble_id = 'Selecciona un inmueble';
-    }
-    if (!formData.cliente_id) {
-      errores.cliente_id = 'Selecciona un cliente';
-    }
-    if (!formData.titulo || formData.titulo.trim() === '') {
-      errores.titulo = 'El título es requerido';
-    }
-    if (!formData.precio_total || parseFloat(formData.precio_total) <= 0) {
-      errores.precio_total = 'Ingresa un precio válido (> 0)';
-    }
-    if (!formData.fecha_inicio) {
-      errores.fecha_inicio = 'La fecha de inicio es requerida';
-    }
-    // ✅ ARREGLADO: Validar fecha_fin correctamente
-    // Si fecha_fin tiene valor, debe ser posterior a fecha_inicio
-    if (formData.fecha_fin && formData.fecha_inicio) {
-      if (new Date(formData.fecha_fin) < new Date(formData.fecha_inicio)) {
-        errores.fecha_fin = 'La fecha de fin debe ser posterior a la de inicio';
-      }
-    }
-    // Si fecha_fin está vacío es OPCIONAL - no es error
-
-    setErroresValidacion(errores);
-    return Object.keys(errores).length === 0;
-  };
-
-  // GUARDAR ✅ SIN DELAY y con limpieza de datos
+  // GUARDAR
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setExito('');
 
     // VALIDAR
-    if (!validar()) {
-      setError('Por favor completa todos los campos obligatorios');
+    if (!formData.inmueble_id) {
+      setError('Selecciona un inmueble');
+      return;
+    }
+    if (!formData.cliente_id) {
+      setError('Selecciona un cliente');
+      return;
+    }
+    if (!formData.titulo) {
+      setError('El título es requerido');
+      return;
+    }
+    if (!formData.precio_total || parseFloat(formData.precio_total) <= 0) {
+      setError('Ingresa un precio válido');
+      return;
+    }
+    if (!formData.fecha_inicio) {
+      setError('La fecha de inicio es requerida');
       return;
     }
 
     setGuardando(true);
 
     try {
-      // ✅ ARREGLADO: Limpiar datos antes de guardar
-      // Convertir strings vacíos a null para campos opcionales
       const datos = {
         ...formData,
         agente_id: user?.id,
-        // ✅ Si fecha_fin está vacío, enviar null en lugar de ""
-        fecha_fin: formData.fecha_fin ? formData.fecha_fin : null,
-        // Otros campos opcionales también
-        descripcion: formData.descripcion || null,
-        notas: formData.notas || null,
-        condiciones_especiales: formData.condiciones_especiales || null,
       };
 
       let res;
@@ -173,18 +141,17 @@ export default function FormularioContrato({
       }
 
       if (res.error) {
-        // ✅ Mostrar error en el UI claramente
-        setError('❌ Error al guardar: ' + res.error);
-        setGuardando(false);
+        setError('Error: ' + res.error);
       } else {
         setExito('✅ ' + (contratoId ? 'Actualizado' : 'Creado'));
-        // ✅ Cerrar INMEDIATAMENTE sin delay
-        if (onGuardado) onGuardado();
-        if (onClose) onClose();
+        setTimeout(() => {
+          if (onGuardado) onGuardado();
+          if (onClose) onClose();
+        }, 1000);
       }
     } catch (err) {
-      console.error('Error en handleSubmit:', err);
-      setError('❌ Error: ' + (err.message || 'Error desconocido'));
+      setError('Error: ' + err.message);
+    } finally {
       setGuardando(false);
     }
   };
@@ -213,7 +180,7 @@ export default function FormularioContrato({
           {/* FILA 1: INMUEBLE Y CLIENTE */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Inmueble *
               </label>
               <select
@@ -222,8 +189,6 @@ export default function FormularioContrato({
                 onChange={handleChange}
                 disabled={loading || guardando}
                 className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                  erroresValidacion.inmueble_id ? 'border-red-500' : ''
-                } ${
                   isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'
                 }`}
               >
@@ -232,11 +197,10 @@ export default function FormularioContrato({
                   <option key={i.id} value={i.id}>{i.titulo}</option>
                 ))}
               </select>
-              {erroresValidacion.inmueble_id && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.inmueble_id}</p>}
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Cliente *
               </label>
               <select
@@ -245,8 +209,6 @@ export default function FormularioContrato({
                 onChange={handleChange}
                 disabled={loading || guardando}
                 className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                  erroresValidacion.cliente_id ? 'border-red-500' : ''
-                } ${
                   isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'
                 }`}
               >
@@ -255,14 +217,13 @@ export default function FormularioContrato({
                   <option key={c.id} value={c.id}>{c.nombre}</option>
                 ))}
               </select>
-              {erroresValidacion.cliente_id && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.cliente_id}</p>}
             </div>
           </div>
 
           {/* FILA 2: TIPO Y NÚMERO */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Tipo *
               </label>
               <select
@@ -279,7 +240,7 @@ export default function FormularioContrato({
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Número
               </label>
               <input
@@ -295,7 +256,7 @@ export default function FormularioContrato({
 
           {/* TÍTULO */}
           <div>
-            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
               Título *
             </label>
             <input
@@ -304,16 +265,13 @@ export default function FormularioContrato({
               value={formData.titulo}
               onChange={handleChange}
               placeholder="Ej: Contrato de compraventa..."
-              className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                erroresValidacion.titulo ? 'border-red-500' : ''
-              } ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+              className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
             />
-            {erroresValidacion.titulo && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.titulo}</p>}
           </div>
 
           {/* DESCRIPCIÓN */}
           <div>
-            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
               Descripción
             </label>
             <textarea
@@ -329,7 +287,7 @@ export default function FormularioContrato({
           {/* FECHAS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Fecha Inicio *
               </label>
               <input
@@ -337,37 +295,28 @@ export default function FormularioContrato({
                 name="fecha_inicio"
                 value={formData.fecha_inicio}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                  erroresValidacion.fecha_inicio ? 'border-red-500' : ''
-                } ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
               />
-              {erroresValidacion.fecha_inicio && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.fecha_inicio}</p>}
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                Fecha Fin (opcional)
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                Fecha Fin
               </label>
               <input
                 type="date"
                 name="fecha_fin"
                 value={formData.fecha_fin}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                  erroresValidacion.fecha_fin ? 'border-red-500' : ''
-                } ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
               />
-              {erroresValidacion.fecha_fin && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.fecha_fin}</p>}
-              <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                Deixa vacío si no aplica
-              </p>
             </div>
           </div>
 
           {/* PRECIO Y COMISIÓN */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Precio (€) *
               </label>
               <input
@@ -378,15 +327,12 @@ export default function FormularioContrato({
                 placeholder="0.00"
                 step="0.01"
                 min="0"
-                className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
-                  erroresValidacion.precio_total ? 'border-red-500' : ''
-                } ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
               />
-              {erroresValidacion.precio_total && <p className="text-xs text-red-500 mt-1">❌ {erroresValidacion.precio_total}</p>}
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Comisión (%)
               </label>
               <input
@@ -402,7 +348,7 @@ export default function FormularioContrato({
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Comisión (€)
               </label>
               <input
@@ -416,7 +362,7 @@ export default function FormularioContrato({
 
           {/* ESTADO */}
           <div>
-            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
               Estado
             </label>
             <select
@@ -436,7 +382,7 @@ export default function FormularioContrato({
           {/* NOTAS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Notas
               </label>
               <textarea
@@ -450,7 +396,7 @@ export default function FormularioContrato({
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Condiciones Especiales
               </label>
               <textarea
@@ -483,7 +429,7 @@ export default function FormularioContrato({
             style={{ backgroundColor: colors.primary }}
           >
             <Save size={18} />
-            {guardando ? '🔄 Guardando...' : contratoId ? '📝 Actualizar' : '✅ Crear'}
+            {guardando ? 'Guardando...' : contratoId ? 'Actualizar' : 'Crear'}
           </button>
         </div>
       </div>
