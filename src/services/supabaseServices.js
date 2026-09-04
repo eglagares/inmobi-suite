@@ -226,109 +226,6 @@ async getMapa() {
 };
 
 
-
-
-// Servicios para la tabla VENTAS
-export const ventaService = {
-  // Obtener todas las ventas
-  async getAll() {
-    try {
-      const { data, error } = await supabase
-        .from('ventas')
-        .select(`
-          *,
-          inmueble:inmueble_id (
-            titulo,
-            precio
-          ),
-          cliente:cliente_id (
-            nombre
-          ),
-          agente:agente_id (
-            nombre
-          )
-        `)
-        .order('fecha_venta', { ascending: false });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Obtener ventas por agente
-  async getByAgente(agente_id) {
-    try {
-      const { data, error } = await supabase
-        .from('ventas')
-        .select('*')
-        .eq('agente_id', agente_id)
-        .order('fecha_venta', { ascending: false });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Crear venta
-  async create(venta) {
-    try {
-      const { data, error } = await supabase
-        .from('ventas')
-        .insert([{
-          ...venta,
-          created_at: new Date(),
-          updated_at: new Date(),
-        }])
-        .select();
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-
-  // Estadísticas de ventas
-  async getStats(agente_id = null) {
-    try {
-      let query = supabase
-        .from('ventas')
-        .select('precio_venta, comision, fecha_venta');
-
-      if (agente_id) {
-        query = query.eq('agente_id', agente_id);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      const totalVentas = data?.length || 0;
-      const totalMonto = data?.reduce((sum, v) => sum + (v.precio_venta || 0), 0) || 0;
-      const totalComisiones = data?.reduce((sum, v) => sum + (v.comision || 0), 0) || 0;
-
-      return {
-        data: {
-          totalVentas,
-          totalMonto,
-          totalComisiones,
-          promedioVenta: totalVentas > 0 ? totalMonto / totalVentas : 0,
-        },
-        error: null,
-      };
-    } catch (err) {
-      return { data: null, error: err.message };
-    }
-  },
-};
-// src/services/supabaseServices.js - Agregar esto
-
-
-
 // ===== SERVICIO DE CLIENTES =====
 export const clienteService = {
   // CREATE - Crear nuevo cliente
@@ -1217,6 +1114,351 @@ export const contratoService = {
         .delete()
         .eq('id', id);
  
+      if (error) throw error;
+      return { error: null };
+    } catch (err) {
+      console.error('Error delete:', err);
+      return { error: err.message };
+    }
+  }
+};
+
+// ============================================
+// SERVICIOS VENTAS - Copiar a supabaseServices.js
+// ============================================
+
+export const ventaService = {
+  // Obtener todas las ventas
+  async getAll() {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getAll:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener venta por ID
+  async getById(id) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (err) {
+      console.error('Error getById:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Obtener ventas por agente
+  async getByAgente(agente_id) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .eq('agente_id', agente_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByAgente:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener ventas por cliente
+  async getByCliente(cliente_id) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .eq('cliente_id', cliente_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByCliente:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener ventas por inmueble
+  async getByInmueble(inmueble_id) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .eq('inmueble_id', inmueble_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByInmueble:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener ventas por tipo (venta o alquiler)
+  async getByTipo(tipo, agente_id = null) {
+    try {
+      let query = supabase
+        .from('ventas')
+        .select('*')
+        .eq('tipo', tipo);
+
+      if (agente_id) {
+        query = query.eq('agente_id', agente_id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByTipo:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener por estado
+  async getByEstado(estado, agente_id = null) {
+    try {
+      let query = supabase
+        .from('ventas')
+        .select('*')
+        .eq('estado', estado);
+
+      if (agente_id) {
+        query = query.eq('agente_id', agente_id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getByEstado:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Crear venta
+  async create(venta) {
+    try {
+      // Generar número único si no existe
+      if (!venta.numero_operacion) {
+        const timestamp = Date.now();
+        venta.numero_operacion = `VTA-${timestamp}`;
+      }
+
+      // Calcular comisión si no está calculada
+      if (!venta.comision_monto && venta.comision_porcentaje && venta.precio_total) {
+        venta.comision_monto = (venta.precio_total * venta.comision_porcentaje) / 100;
+      }
+
+      const { data, error } = await supabase
+        .from('ventas')
+        .insert([venta])
+        .select();
+
+      if (error) throw error;
+      return { data: data?.[0] || null, error: null };
+    } catch (err) {
+      console.error('Error create:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Actualizar venta
+  async update(id, venta) {
+    try {
+      // Calcular comisión si cambió
+      if (venta.comision_porcentaje && venta.precio_total) {
+        venta.comision_monto = (venta.precio_total * venta.comision_porcentaje) / 100;
+      }
+
+      const { data, error } = await supabase
+        .from('ventas')
+        .update(venta)
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+      return { data: data?.[0] || null, error: null };
+    } catch (err) {
+      console.error('Error update:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Cambiar estado
+  async cambiarEstado(id, nuevoEstado) {
+    try {
+      const updateData = {
+        estado: nuevoEstado,
+      };
+
+      // Si cambió a completada, registrar fecha
+      if (nuevoEstado === 'completada') {
+        updateData.fecha_completacion = new Date().toISOString().split('T')[0];
+      }
+      // Si cambió a cancelada, registrar fecha
+      if (nuevoEstado === 'cancelada') {
+        updateData.fecha_cancelacion = new Date().toISOString().split('T')[0];
+      }
+
+      const { data, error } = await supabase
+        .from('ventas')
+        .update(updateData)
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+      return { data: data?.[0] || null, error: null };
+    } catch (err) {
+      console.error('Error cambiarEstado:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Completar venta/alquiler
+  async completar(id) {
+    return this.cambiarEstado(id, 'completada');
+  },
+
+  // Cancelar venta/alquiler
+  async cancelar(id) {
+    return this.cambiarEstado(id, 'cancelada');
+  },
+
+  // Buscar ventas
+  async search(termino) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas')
+        .select('*')
+        .or(`numero_operacion.ilike.%${termino}%,titulo.ilike.%${termino}%`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error search:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Obtener estadísticas
+  async getStats(agente_id = null) {
+    try {
+      let query = supabase.from('ventas').select('*', { count: 'exact' });
+
+      if (agente_id) {
+        query = query.eq('agente_id', agente_id);
+      }
+
+      const { data, count, error } = await query;
+
+      if (error) throw error;
+
+      // Calcular estadísticas
+      const stats = {
+        total: count || 0,
+        ventas: 0,
+        alquileres: 0,
+        pendientes: 0,
+        completadas: 0,
+        canceladas: 0,
+        valor_total: 0,
+        comisiones_totales: 0,
+      };
+
+      if (data) {
+        data.forEach(venta => {
+          // Por tipo
+          if (venta.tipo === 'venta') stats.ventas++;
+          if (venta.tipo === 'alquiler') stats.alquileres++;
+
+          // Por estado
+          if (venta.estado === 'pendiente') stats.pendientes++;
+          if (venta.estado === 'completada') stats.completadas++;
+          if (venta.estado === 'cancelada') stats.canceladas++;
+
+          // Totales
+          stats.valor_total += venta.precio_total || 0;
+          stats.comisiones_totales += venta.comision_monto || 0;
+        });
+      }
+
+      return { data: stats, error: null };
+    } catch (err) {
+      console.error('Error getStats:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Obtener historial
+  async getHistorial(id) {
+    try {
+      const { data, error } = await supabase
+        .from('ventas_historial')
+        .select('*')
+        .eq('venta_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error('Error getHistorial:', err);
+      return { data: [], error: err.message };
+    }
+  },
+
+  // Subir documento
+  async subirDocumento(id, archivo, tipo = 'documento') {
+    try {
+      const nombreArchivo = `venta-${id}-${Date.now()}-${archivo.name}`;
+      const { data, error } = await supabase.storage
+        .from('ventas')
+        .upload(nombreArchivo, archivo);
+
+      if (error) throw error;
+
+      const urlPublica = `${process.env.VITE_SUPABASE_URL}/storage/v1/object/public/ventas/${data.path}`;
+
+      if (tipo === 'documento') {
+        await this.update(id, { documento_url: urlPublica });
+      }
+
+      return { data: urlPublica, error: null };
+    } catch (err) {
+      console.error('Error subirDocumento:', err);
+      return { data: null, error: err.message };
+    }
+  },
+
+  // Eliminar venta
+  async delete(id) {
+    try {
+      const { error } = await supabase
+        .from('ventas')
+        .delete()
+        .eq('id', id);
+
       if (error) throw error;
       return { error: null };
     } catch (err) {
